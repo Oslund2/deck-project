@@ -616,6 +616,132 @@
       </div>
     </section>
 
+    <!-- ===== CONTRACT ===== -->
+    <section x-show="tab === 'contract'">
+      <!-- Contract list or create -->
+      <div class="card mb-4">
+        <div class="card-header flex items-center justify-between">
+          <h2 class="font-semibold">Contract</h2>
+          <button @click="generateContract()" class="text-green-200 hover:text-white text-sm no-print" x-show="!activeContract">+ Generate Draft</button>
+        </div>
+        <div class="p-4">
+          <!-- No contract yet -->
+          <div x-show="!activeContract" class="text-center py-8 text-gray-400">
+            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <p class="text-sm">No contract yet. Click "Generate Draft" to create one from current project data.</p>
+          </div>
+
+          <!-- Active contract -->
+          <template x-if="activeContract">
+            <div>
+              <!-- Status bar -->
+              <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="pill text-xs" :class="{
+                    'bg-gray-200 text-gray-700': activeContract.status==='draft',
+                    'bg-blue-100 text-blue-700': activeContract.status==='review',
+                    'bg-yellow-100 text-yellow-800': activeContract.status==='final',
+                    'savings-badge': activeContract.status==='signed',
+                    'bg-red-100 text-red-700': activeContract.status==='voided'
+                  }" x-text="activeContract.status.toUpperCase()"></span>
+                  <span class="text-xs text-gray-400" x-text="'v' + activeContract.version"></span>
+                  <span class="text-xs text-gray-400" x-text="new Date(activeContract.updated_at || activeContract.created_at).toLocaleDateString()"></span>
+                </div>
+                <!-- Workflow buttons -->
+                <div class="flex gap-2 no-print">
+                  <button x-show="activeContract.status==='draft'" @click="updateContractStatus('review')" class="px-3 py-1 bg-blue-600 text-white rounded text-xs">Send for Review</button>
+                  <button x-show="activeContract.status==='review'" @click="updateContractStatus('draft')" class="px-3 py-1 bg-gray-400 text-white rounded text-xs">Back to Draft</button>
+                  <button x-show="activeContract.status==='review'" @click="updateContractStatus('final')" class="px-3 py-1 bg-yellow-600 text-white rounded text-xs">Mark Final</button>
+                  <button x-show="activeContract.status==='final' && !activeContract.homeowner_signed && !activeContract.builder_signed" @click="updateContractStatus('review')" class="px-3 py-1 bg-gray-400 text-white rounded text-xs">Reopen for Edits</button>
+                  <button x-show="activeContract.status==='signed'" @click="updateContractStatus('voided')" class="px-3 py-1 bg-red-500 text-white rounded text-xs">Void</button>
+                  <button x-show="activeContract.status==='voided'" @click="newContractVersion()" class="px-3 py-1 brand-bg text-white rounded text-xs">New Version</button>
+                </div>
+              </div>
+
+              <!-- Contract title -->
+              <div class="mb-3">
+                <input x-show="activeContract.status==='draft'" x-model="activeContract.title" @input="contractDirty=true" class="edit-input font-bold text-lg">
+                <h3 x-show="activeContract.status!=='draft'" class="font-bold text-lg" x-text="activeContract.title"></h3>
+              </div>
+
+              <!-- Contract body -->
+              <div class="mb-4">
+                <textarea x-show="activeContract.status==='draft' || activeContract.status==='review'" x-model="activeContract.content" @input="contractDirty=true" rows="20" class="edit-input text-sm leading-relaxed w-full" style="min-height:400px"></textarea>
+                <div x-show="activeContract.status==='final' || activeContract.status==='signed' || activeContract.status==='voided'" class="prose prose-sm max-w-none bg-white border rounded-lg p-4" style="white-space:pre-wrap;font-size:13px;line-height:1.6" x-text="activeContract.content"></div>
+              </div>
+
+              <!-- Save draft button -->
+              <button x-show="contractDirty && (activeContract.status==='draft' || activeContract.status==='review')" @click="saveContract()" class="brand-bg text-white px-4 py-2 rounded-lg text-sm w-full mb-4 no-print">Save Changes</button>
+
+              <!-- Notes -->
+              <div class="mb-4" x-show="activeContract.status!=='signed'">
+                <label class="text-xs font-bold text-gray-500 uppercase">Notes / Comments</label>
+                <textarea x-model="activeContract.notes" @input="contractDirty=true" rows="3" class="edit-input text-sm mt-1" placeholder="Add notes, requested changes, concerns..."></textarea>
+              </div>
+
+              <!-- Signature section (only on Final) -->
+              <div x-show="activeContract.status==='final' || activeContract.status==='signed'" class="border-t-2 pt-4">
+                <h4 class="text-sm font-bold mb-3">Electronic Signatures</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Homeowner signature -->
+                  <div class="border rounded-lg p-3">
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-2">Homeowner</div>
+                    <div x-show="activeContract.homeowner_signed" class="text-center">
+                      <img :src="activeContract.homeowner_signature_url" class="max-h-16 mx-auto mb-1" alt="Signature">
+                      <div class="text-xs text-green-600 font-medium">Signed <span x-text="new Date(activeContract.homeowner_signed_at).toLocaleString()"></span></div>
+                    </div>
+                    <div x-show="!activeContract.homeowner_signed && activeContract.status==='final'">
+                      <div x-show="role==='homeowner'" class="no-print">
+                        <canvas x-ref="sigCanvasHomeowner" width="300" height="100" class="border rounded bg-white w-full" style="touch-action:none;cursor:crosshair"
+                          @mousedown="startSign($event,'homeowner')" @mousemove="drawSign($event,'homeowner')" @mouseup="endSign('homeowner')"
+                          @touchstart.prevent="startSign($event,'homeowner')" @touchmove.prevent="drawSign($event,'homeowner')" @touchend="endSign('homeowner')"></canvas>
+                        <div class="flex gap-2 mt-2">
+                          <button @click="clearSig('homeowner')" class="px-3 py-1 bg-gray-200 rounded text-xs flex-1">Clear</button>
+                          <button @click="submitSignature('homeowner')" class="px-3 py-1 bg-green-600 text-white rounded text-xs flex-1 font-medium">Sign & Accept</button>
+                        </div>
+                      </div>
+                      <div x-show="role!=='homeowner'" class="text-xs text-gray-400 text-center py-4">Awaiting homeowner signature</div>
+                    </div>
+                  </div>
+                  <!-- Builder signature -->
+                  <div class="border rounded-lg p-3">
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-2">Builder</div>
+                    <div x-show="activeContract.builder_signed" class="text-center">
+                      <img :src="activeContract.builder_signature_url" class="max-h-16 mx-auto mb-1" alt="Signature">
+                      <div class="text-xs text-green-600 font-medium">Signed <span x-text="new Date(activeContract.builder_signed_at).toLocaleString()"></span></div>
+                    </div>
+                    <div x-show="!activeContract.builder_signed && activeContract.status==='final'">
+                      <div x-show="role==='builder'" class="no-print">
+                        <canvas x-ref="sigCanvasBuilder" width="300" height="100" class="border rounded bg-white w-full" style="touch-action:none;cursor:crosshair"
+                          @mousedown="startSign($event,'builder')" @mousemove="drawSign($event,'builder')" @mouseup="endSign('builder')"
+                          @touchstart.prevent="startSign($event,'builder')" @touchmove.prevent="drawSign($event,'builder')" @touchend="endSign('builder')"></canvas>
+                        <div class="flex gap-2 mt-2">
+                          <button @click="clearSig('builder')" class="px-3 py-1 bg-gray-200 rounded text-xs flex-1">Clear</button>
+                          <button @click="submitSignature('builder')" class="px-3 py-1 bg-green-600 text-white rounded text-xs flex-1 font-medium">Sign & Accept</button>
+                        </div>
+                      </div>
+                      <div x-show="role!=='builder'" class="text-xs text-gray-400 text-center py-4">Awaiting builder signature</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Version history -->
+              <div x-show="contracts.length > 1" class="border-t pt-3 mt-4">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Version History</h4>
+                <template x-for="c in contracts" :key="c.id">
+                  <div class="flex items-center justify-between py-1 text-xs cursor-pointer hover:bg-gray-50 rounded px-2" @click="activeContract = c; contractDirty = false">
+                    <span :class="c.id === activeContract.id ? 'font-bold brand-text' : 'text-gray-600'" x-text="'v' + c.version + ' — ' + c.status"></span>
+                    <span class="text-gray-400" x-text="new Date(c.created_at).toLocaleDateString()"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== SUMMARY ===== -->
     <section x-show="tab === 'summary'">
       <div class="grid grid-cols-3 gap-3 mb-4">
@@ -685,6 +811,7 @@ function deckApp() {
     project: {}, quantities: [], selections: [], productOptions: [],
     structuralItems: [], laborItems: [], permitItems: [], scopeItems: [], images: [],
     changeRequests: [], showNewChange: false,
+    contracts: [], activeContract: null, contractDirty: false, signing: { active: false, who: '' },
     newChange: { request_type: 'add', category: 'structural', title: '', description: '', estimated_cost: '' },
     editing: { overview:false, quantities:false, structural:false, labor:false, permits:false },
     calc: {
@@ -706,7 +833,7 @@ function deckApp() {
     ],
     tabs: [
       {id:'overview',label:'Overview'},{id:'products',label:'Products'},{id:'calc',label:'Calculator'},{id:'costs',label:'Costs'},
-      {id:'changes',label:'Changes'},{id:'scope',label:'Scope'},{id:'summary',label:'Summary'},
+      {id:'changes',label:'Changes'},{id:'scope',label:'Scope'},{id:'contract',label:'Contract'},{id:'summary',label:'Summary'},
     ],
 
     async init() {
@@ -722,6 +849,7 @@ function deckApp() {
         sb.from('scope_items').select('*').eq('project_id', PROJECT_ID).order('sort_order'),
         sb.from('images').select('*').eq('project_id', PROJECT_ID).order('sort_order'),
         sb.from('change_requests').select('*').eq('project_id', PROJECT_ID).order('created_at', {ascending:false}),
+        sb.from('contracts').select('*').eq('project_id', PROJECT_ID).order('version', {ascending:false}),
       ]);
       this.project = proj.data || {};
       this.quantities = quant.data || [];
@@ -733,6 +861,9 @@ function deckApp() {
       this.scopeItems = scope.data || [];
       this.images = imgs.data || [];
       this.changeRequests = changes.data || [];
+      const contractsData = arguments[0] ? null : null; // handled below
+      this.contracts = (await sb.from('contracts').select('*').eq('project_id', PROJECT_ID).order('version', {ascending:false})).data || [];
+      this.activeContract = this.contracts[0] || null;
       // Init area calculators from saved sqft values
       for (const area of this.areaCalcs) {
         const q = this.quantities.find(q => q.key === area.sqftKey);
@@ -961,6 +1092,220 @@ function deckApp() {
       await sb.from('change_requests').update({status: 'rejected', resolved_at: new Date().toISOString()}).eq('id', cr.id);
       cr.status = 'rejected';
       this.showToast('Change rejected');
+    },
+
+    // ─── CONTRACT ───
+    async generateContract() {
+      const p = this.project;
+      const today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+      const mt = this.materialTotals();
+      const st = this.structuralTotal();
+      const lt = this.laborTotal();
+      const pt = this.permitTotal();
+      const gt = this.grandTotal('offered');
+
+      // Build material selections text
+      const selText = this.productCategories.map(cat => {
+        const prod = this.getSelected(cat.key);
+        return prod ? `  - ${cat.label}: ${prod.name} (${prod.brand}) — ${this.fmt(prod.offered)} ${prod.unit}` : `  - ${cat.label}: TBD`;
+      }).join('\n');
+
+      // Build scope exclusions
+      const scopeText = this.scopeItems.map(s => `  - ${s.name} (Est. $${s.est_cost})`).join('\n');
+
+      const content = `DECK REPLACEMENT AGREEMENT
+═══════════════════════════════════════
+
+Date: ${today}
+Project: ${p.name || 'Deck Replacement & Screened Underporch'}
+Address: ${p.address || '[Property Address]'}
+
+PARTIES:
+  Homeowner: ${p.homeowner_name || '[Homeowner Name]'}
+  Builder/Contractor: ${p.builder_name || '[Contractor Name]'}
+
+
+1. SCOPE OF WORK
+─────────────────
+The Contractor agrees to perform the following work:
+${p.description || 'Full tear-off and replacement of existing deck with water-tight decking system and screened-in underporch below.'}
+
+This includes demolition of existing structure, new framing, decking installation, railing, waterproofing/drainage system, underporch screening, staircase, catwalk, and all associated structural work.
+
+
+2. SELECTED MATERIALS
+─────────────────────
+${selText}
+
+Material selections may be changed by mutual written agreement (see Change Request process).
+
+
+3. COST BREAKDOWN
+─────────────────
+  Materials (selected products):  ${this.fmt(mt.offered)}
+  Structural & Hardware:          ${this.fmt(st)}
+  Labor:                          ${this.fmt(lt)}
+  Permits & Fees:                 ${this.fmt(pt)}
+  ─────────────────────────────────
+  TOTAL PROJECT COST:             ${this.fmt(gt)}
+
+
+4. PAYMENT SCHEDULE
+───────────────────
+  - Deposit (upon signing):       ${this.fmt(gt * 0.33)}  (33%)
+  - Framing complete:             ${this.fmt(gt * 0.33)}  (33%)
+  - Final completion:             ${this.fmt(gt * 0.34)}  (34%)
+
+
+5. TIMELINE
+───────────
+  Estimated Start: ${p.start_date || '[TBD]'}
+  Estimated Completion: ${p.completion_date || '[TBD]'}
+  Timeline is subject to weather, material availability, and permitting.
+
+
+6. CHANGE ORDERS
+────────────────
+Any changes to the scope, materials, or design must be submitted through the project's Change Request system. Both parties must approve before work proceeds. Cost adjustments will be documented.
+
+
+7. OUT OF SCOPE
+───────────────
+The following are expressly NOT included in this agreement:
+${scopeText}
+
+These items may be added via Change Request at additional cost.
+
+
+8. WARRANTY
+───────────
+  - Workmanship: Contractor warrants labor for [1 year / 2 years] from completion.
+  - Materials: Per manufacturer warranty (see product links in project tool).
+  - Structural: Per local building code requirements.
+
+
+9. PERMITS & INSPECTIONS
+────────────────────────
+Contractor is responsible for obtaining all required permits and scheduling inspections. Permit costs are included in the total above.
+
+
+10. DISPUTE RESOLUTION
+──────────────────────
+Disputes shall first be addressed through direct negotiation. If unresolved within 30 days, parties agree to mediation before pursuing legal action.
+
+
+11. ACCEPTANCE
+──────────────
+By signing below, both parties agree to the terms outlined in this agreement.
+
+
+
+_________________________________          _________________________________
+Homeowner Signature / Date                 Builder Signature / Date
+${p.homeowner_name || '[Name]'}                              ${p.builder_name || '[Name]'}`;
+
+      const row = {
+        project_id: PROJECT_ID, version: this.contracts.length + 1, status: 'draft',
+        title: 'Deck Replacement Agreement', content, created_by: this.role, notes: ''
+      };
+      const {data} = await sb.from('contracts').insert(row).select().single();
+      if (data) {
+        this.contracts.unshift(data);
+        this.activeContract = data;
+        this.showToast('Contract draft generated');
+      }
+    },
+
+    async saveContract() {
+      if (!this.activeContract) return;
+      const c = this.activeContract;
+      await sb.from('contracts').update({
+        title: c.title, content: c.content, notes: c.notes, updated_at: new Date().toISOString()
+      }).eq('id', c.id);
+      this.contractDirty = false;
+      this.showToast('Contract saved');
+    },
+
+    async updateContractStatus(status) {
+      if (!this.activeContract) return;
+      await sb.from('contracts').update({status, updated_at: new Date().toISOString()}).eq('id', this.activeContract.id);
+      this.activeContract.status = status;
+      this.showToast('Contract status: ' + status);
+    },
+
+    async newContractVersion() {
+      const prev = this.activeContract;
+      const row = {
+        project_id: PROJECT_ID, version: this.contracts.length + 1, status: 'draft',
+        title: prev.title, content: prev.content, created_by: this.role,
+        notes: 'Revised from v' + prev.version
+      };
+      const {data} = await sb.from('contracts').insert(row).select().single();
+      if (data) {
+        this.contracts.unshift(data);
+        this.activeContract = data;
+        this.showToast('New version created');
+      }
+    },
+
+    // Signature pad
+    startSign(e, who) {
+      this.signing = {active: true, who};
+      const canvas = this.$refs['sigCanvas' + (who === 'homeowner' ? 'Homeowner' : 'Builder')];
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const pt = e.touches ? e.touches[0] : e;
+      ctx.beginPath();
+      ctx.moveTo((pt.clientX - rect.left) * (canvas.width / rect.width), (pt.clientY - rect.top) * (canvas.height / rect.height));
+    },
+    drawSign(e, who) {
+      if (!this.signing.active || this.signing.who !== who) return;
+      const canvas = this.$refs['sigCanvas' + (who === 'homeowner' ? 'Homeowner' : 'Builder')];
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const pt = e.touches ? e.touches[0] : e;
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineCap = 'round';
+      ctx.lineTo((pt.clientX - rect.left) * (canvas.width / rect.width), (pt.clientY - rect.top) * (canvas.height / rect.height));
+      ctx.stroke();
+    },
+    endSign(who) { this.signing = {active: false, who: ''}; },
+    clearSig(who) {
+      const canvas = this.$refs['sigCanvas' + (who === 'homeowner' ? 'Homeowner' : 'Builder')];
+      if (!canvas) return;
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    },
+    async submitSignature(who) {
+      const canvas = this.$refs['sigCanvas' + (who === 'homeowner' ? 'Homeowner' : 'Builder')];
+      if (!canvas || !this.activeContract) return;
+      const dataUrl = canvas.toDataURL('image/png');
+      // Upload signature to Supabase storage
+      const blob = await (await fetch(dataUrl)).blob();
+      const path = `${PROJECT_ID}/signatures/${who}-v${this.activeContract.version}-${Date.now()}.png`;
+      await sb.storage.from('project-images').upload(path, blob);
+      const {data: urlData} = sb.storage.from('project-images').getPublicUrl(path);
+      const sigUrl = urlData.publicUrl;
+      const now = new Date().toISOString();
+      const update = {};
+      if (who === 'homeowner') {
+        update.homeowner_signed = true;
+        update.homeowner_signature_url = sigUrl;
+        update.homeowner_signed_at = now;
+      } else {
+        update.builder_signed = true;
+        update.builder_signature_url = sigUrl;
+        update.builder_signed_at = now;
+      }
+      // Check if both signed
+      const otherSigned = who === 'homeowner' ? this.activeContract.builder_signed : this.activeContract.homeowner_signed;
+      if (otherSigned) update.status = 'signed';
+      update.updated_at = now;
+      await sb.from('contracts').update(update).eq('id', this.activeContract.id);
+      Object.assign(this.activeContract, update);
+      this.showToast(who === 'homeowner' ? 'Homeowner signed!' : 'Builder signed!');
     },
   };
 }

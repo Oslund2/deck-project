@@ -1,0 +1,956 @@
+{
+  "project": {
+    "name": "Deck Replacement & Screened Underporch",
+    "description": "Full tear-off and replacement of existing deck with water-tight decking system and screened-in underporch below.",
+    "address": "",
+    "contractor": "",
+    "start_date": "",
+    "completion_date": ""
+  },
+  "images": {
+    "current": [
+      "/static/images/current/01-house-overview.jpg",
+      "/static/images/current/02-stairs-and-entry.jpg",
+      "/static/images/current/03-underporch-corner.jpg",
+      "/static/images/current/04-underporch-lake-view.jpg"
+    ],
+    "rendered": [
+      "/static/images/rendered/01-screened-porch-interior.png"
+    ]
+  },
+  "product_options": {
+    "decking": [
+      {
+        "id": "trex-enhance-basics",
+        "name": "Trex Enhance Basics",
+        "brand": "Trex",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 3.15,
+        "retail": 4.0,
+        "offered": 4.25,
+        "notes": "Entry-level; single-sided cap; 25-yr warranty"
+      },
+      {
+        "id": "trex-enhance-naturals",
+        "name": "Trex Enhance Naturals",
+        "brand": "Trex",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 3.65,
+        "retail": 4.65,
+        "offered": 4.9,
+        "notes": "Multi-tonal grain; 25-yr warranty; most popular Trex SKU"
+      },
+      {
+        "id": "trex-select",
+        "name": "Trex Select",
+        "brand": "Trex",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 4.25,
+        "retail": 5.5,
+        "offered": 5.9,
+        "notes": "Mid-tier; 35-yr warranty; grooved for hidden fasteners"
+      },
+      {
+        "id": "trex-transcend",
+        "name": "Trex Transcend",
+        "brand": "Trex",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 5.75,
+        "retail": 7.5,
+        "offered": 8.0,
+        "notes": "50-yr warranty; widest color palette; premium wood look"
+      },
+      {
+        "id": "trex-transcend-lineage",
+        "name": "Trex Transcend Lineage",
+        "brand": "Trex",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 6.75,
+        "retail": 9.0,
+        "offered": 9.5,
+        "notes": "CoolDeck tech (25F cooler); 50-yr warranty; top Trex"
+      },
+      {
+        "id": "timbertech-edge",
+        "name": "TimberTech Edge",
+        "brand": "TimberTech",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 3.9,
+        "retail": 5.0,
+        "offered": 5.25,
+        "notes": "Entry TimberTech composite; 30-yr warranty"
+      },
+      {
+        "id": "timbertech-legacy",
+        "name": "TimberTech Legacy",
+        "brand": "TimberTech",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 4.75,
+        "retail": 6.15,
+        "offered": 6.5,
+        "notes": "Mid-grade composite; 30-yr warranty; multi-width boards"
+      },
+      {
+        "id": "azek-harvest",
+        "name": "AZEK Harvest Collection",
+        "brand": "AZEK",
+        "type": "Advanced PVC",
+        "unit": "per LF",
+        "wholesale": 5.0,
+        "retail": 6.5,
+        "offered": 7.0,
+        "notes": "100% PVC, zero organic content; 30-yr full warranty"
+      },
+      {
+        "id": "azek-landmark",
+        "name": "AZEK Landmark Collection",
+        "brand": "AZEK",
+        "type": "Advanced PVC",
+        "unit": "per LF",
+        "wholesale": 5.9,
+        "retail": 7.75,
+        "offered": 8.25,
+        "notes": "Mid-tier PVC; richer grain; contractor favorite"
+      },
+      {
+        "id": "azek-vintage",
+        "name": "AZEK Vintage Collection",
+        "brand": "AZEK",
+        "type": "Advanced PVC",
+        "unit": "per LF",
+        "wholesale": 6.75,
+        "retail": 8.75,
+        "offered": 9.25,
+        "notes": "Top AZEK; most realistic wood aesthetic; 30-yr warranty"
+      },
+      {
+        "id": "fiberon-goodlife",
+        "name": "Fiberon Good Life",
+        "brand": "Fiberon",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 2.45,
+        "retail": 3.4,
+        "offered": 3.65,
+        "notes": "Budget entry composite; 25-yr warranty"
+      },
+      {
+        "id": "fiberon-symmetry",
+        "name": "Fiberon Symmetry",
+        "brand": "Fiberon",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 5.15,
+        "retail": 6.5,
+        "offered": 6.9,
+        "notes": "Mid-premium smooth face; 25-yr fade/stain warranty"
+      },
+      {
+        "id": "fiberon-paramount",
+        "name": "Fiberon Paramount",
+        "brand": "Fiberon",
+        "type": "3-Sided PVC Cap",
+        "unit": "per LF",
+        "wholesale": 5.5,
+        "retail": 7.0,
+        "offered": 7.5,
+        "notes": "PVC-capped 3 sides; lifetime residential warranty"
+      },
+      {
+        "id": "fiberon-promenade",
+        "name": "Fiberon Promenade",
+        "brand": "Fiberon",
+        "type": "4-Sided PVC Cap",
+        "unit": "per LF",
+        "wholesale": 8.5,
+        "retail": 10.25,
+        "offered": 11.25,
+        "notes": "Full PVC; 4-sided cap; lifetime warranty; AZEK alternative"
+      },
+      {
+        "id": "deckorators-frontier",
+        "name": "Deckorators Frontier",
+        "brand": "Deckorators",
+        "type": "Mineral-Based Composite",
+        "unit": "per LF",
+        "wholesale": 4.15,
+        "retail": 5.15,
+        "offered": 5.5,
+        "notes": "Zero wood fiber = zero moisture absorption; 30-yr warranty"
+      },
+      {
+        "id": "deckorators-vault",
+        "name": "Deckorators Vault",
+        "brand": "Deckorators",
+        "type": "Mineral-Based Composite",
+        "unit": "per LF",
+        "wholesale": 4.75,
+        "retail": 6.0,
+        "offered": 6.5,
+        "notes": "Mid-tier MBC; richer colors; 30-yr warranty; Lowe's"
+      },
+      {
+        "id": "deckorators-voyage",
+        "name": "Deckorators Voyage",
+        "brand": "Deckorators",
+        "type": "Mineral-Based Composite",
+        "unit": "per LF",
+        "wholesale": 4.9,
+        "retail": 6.4,
+        "offered": 6.75,
+        "notes": "Premium MBC; most realistic grain; 30-yr warranty"
+      },
+      {
+        "id": "wolf-perspective",
+        "name": "Wolf Perspective",
+        "brand": "Wolf",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 5.75,
+        "retail": 7.25,
+        "offered": 7.75,
+        "notes": "Mid-premium; 25-yr warranty; dealer/lumberyard channel"
+      },
+      {
+        "id": "wolf-serenity",
+        "name": "Wolf Serenity",
+        "brand": "Wolf",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 7.65,
+        "retail": 9.25,
+        "offered": 10.0,
+        "notes": "Premium line; deep embossing; 25-yr warranty"
+      },
+      {
+        "id": "moistureshield-elevate",
+        "name": "MoistureShield Elevate",
+        "brand": "MoistureShield",
+        "type": "Capped Composite",
+        "unit": "per LF",
+        "wholesale": 4.85,
+        "retail": 6.0,
+        "offered": 6.5,
+        "notes": "Can be submerged; great for lakefront; 25-yr warranty"
+      },
+      {
+        "id": "moistureshield-vision",
+        "name": "MoistureShield Vision CoolDeck",
+        "brand": "MoistureShield",
+        "type": "Premium Composite",
+        "unit": "per LF",
+        "wholesale": 7.6,
+        "retail": 9.5,
+        "offered": 10.25,
+        "notes": "CoolDeck tech (25F cooler surface); 25-yr warranty"
+      },
+      {
+        "id": "zuri-premium",
+        "name": "Zuri Premium",
+        "brand": "Zuri (Royal)",
+        "type": "Full Cellular PVC",
+        "unit": "per LF",
+        "wholesale": 9.75,
+        "retail": 12.5,
+        "offered": 13.5,
+        "notes": "Most realistic PVC on market; hardwood-exact texture; dealer-only"
+      },
+      {
+        "id": "western-red-cedar",
+        "name": "Western Red Cedar (Clear)",
+        "brand": "Natural Wood",
+        "type": "Wood",
+        "unit": "per LF",
+        "wholesale": 5.25,
+        "retail": 7.5,
+        "offered": 8.5,
+        "notes": "Naturally rot-resistant; requires annual staining; 15-30yr life"
+      },
+      {
+        "id": "ipe-hardwood",
+        "name": "Ipe (Brazilian Walnut)",
+        "brand": "Natural Wood",
+        "type": "Tropical Hardwood",
+        "unit": "per LF",
+        "wholesale": 7.5,
+        "retail": 10.5,
+        "offered": 11.5,
+        "notes": "Hardest deck wood; 75-yr lifespan; Class A fire rated"
+      },
+      {
+        "id": "pt-pine",
+        "name": "Pressure-Treated Pine",
+        "brand": "Natural Wood",
+        "type": "PT Lumber",
+        "unit": "per LF",
+        "wholesale": 1.5,
+        "retail": 2.15,
+        "offered": 2.75,
+        "notes": "Most affordable; requires annual maintenance; 15-20yr life"
+      }
+    ],
+    "railing": [
+      {
+        "id": "trex-select-rail",
+        "name": "Trex Select Railing",
+        "brand": "Trex",
+        "type": "Composite",
+        "unit": "per LF",
+        "wholesale": 33.0,
+        "retail": 45.0,
+        "offered": 50.0,
+        "notes": "Entry composite railing; white/black only; 25-yr warranty"
+      },
+      {
+        "id": "trex-transcend-rail",
+        "name": "Trex Transcend Railing",
+        "brand": "Trex",
+        "type": "Composite",
+        "unit": "per LF",
+        "wholesale": 50.0,
+        "retail": 68.0,
+        "offered": 75.0,
+        "notes": "Premium composite; matches Transcend deck colors; 25-yr warranty"
+      },
+      {
+        "id": "timbertech-radiance-express",
+        "name": "TimberTech RadianceRail Express",
+        "brand": "TimberTech",
+        "type": "Composite",
+        "unit": "per LF",
+        "wholesale": 55.0,
+        "retail": 78.0,
+        "offered": 85.0,
+        "notes": "Minimalist look; kit-based; 30-yr warranty"
+      },
+      {
+        "id": "timbertech-radiance-full",
+        "name": "TimberTech RadianceRail",
+        "brand": "TimberTech",
+        "type": "Composite + Aluminum",
+        "unit": "per LF",
+        "wholesale": 78.0,
+        "retail": 110.0,
+        "offered": 122.0,
+        "notes": "Multiple profiles; cable infill option; 30-yr warranty"
+      },
+      {
+        "id": "deckorators-estate",
+        "name": "Deckorators Estate",
+        "brand": "Deckorators",
+        "type": "Composite",
+        "unit": "per LF",
+        "wholesale": 38.0,
+        "retail": 51.0,
+        "offered": 58.0,
+        "notes": "Mid-range composite; matches Deckorators decking; 20-yr warranty"
+      },
+      {
+        "id": "trex-signature-rail",
+        "name": "Trex Signature Aluminum",
+        "brand": "Trex",
+        "type": "Aluminum",
+        "unit": "per LF",
+        "wholesale": 65.0,
+        "retail": 88.0,
+        "offered": 98.0,
+        "notes": "Sleek modern profile; matches Trex deck colors; 25-yr warranty"
+      },
+      {
+        "id": "deckorators-alx",
+        "name": "Deckorators ALX",
+        "brand": "Deckorators",
+        "type": "Aluminum",
+        "unit": "per LF",
+        "wholesale": 47.0,
+        "retail": 63.0,
+        "offered": 70.0,
+        "notes": "Powder-coated aluminum; mid-price; Lowe's; 20-yr warranty"
+      },
+      {
+        "id": "fortress-al13",
+        "name": "Fortress Al13 PLUS",
+        "brand": "Fortress",
+        "type": "Aluminum (Pre-Welded)",
+        "unit": "per LF",
+        "wholesale": 55.0,
+        "retail": 78.0,
+        "offered": 85.0,
+        "notes": "Pre-welded panels; bracket-mount; minimal site fabrication"
+      },
+      {
+        "id": "westbury-tuscany",
+        "name": "Westbury Tuscany C10",
+        "brand": "Westbury",
+        "type": "Aluminum",
+        "unit": "per LF",
+        "wholesale": 60.0,
+        "retail": 83.0,
+        "offered": 92.0,
+        "notes": "Industry workhorse; 12 standard colors; square or round balusters"
+      },
+      {
+        "id": "railblazers",
+        "name": "RailBlazers Aluminum",
+        "brand": "RailBlazers",
+        "type": "Aluminum",
+        "unit": "per LF",
+        "wholesale": 49.0,
+        "retail": 67.0,
+        "offered": 74.0,
+        "notes": "DIY-friendly; Lowe's; galvanized + powder-coated; good value"
+      },
+      {
+        "id": "feeney-cablerail",
+        "name": "Feeney CableRail (infill only)",
+        "brand": "Feeney",
+        "type": "Stainless Cable",
+        "unit": "per LF",
+        "wholesale": 26.0,
+        "retail": 42.0,
+        "offered": 50.0,
+        "notes": "Cable infill only; requires separate frame; price drops on long runs"
+      },
+      {
+        "id": "feeney-designrail",
+        "name": "Feeney DesignRail (complete)",
+        "brand": "Feeney",
+        "type": "Aluminum + Cable",
+        "unit": "per LF",
+        "wholesale": 105.0,
+        "retail": 135.0,
+        "offered": 148.0,
+        "notes": "Complete frame + cable system; elite cable railing; 10-yr warranty"
+      },
+      {
+        "id": "atlantis-raileasy",
+        "name": "Atlantis RailEasy",
+        "brand": "Atlantis Rail",
+        "type": "Stainless Cable",
+        "unit": "per LF",
+        "wholesale": 25.0,
+        "retail": 36.0,
+        "offered": 42.0,
+        "notes": "Most economical cable infill; modular; works with any post system"
+      },
+      {
+        "id": "framed-glass",
+        "name": "Framed Glass Panel",
+        "brand": "Various",
+        "type": "Tempered Glass + Aluminum",
+        "unit": "per LF",
+        "wholesale": 118.0,
+        "retail": 170.0,
+        "offered": 188.0,
+        "notes": "Aluminum-framed tempered glass; maximizes views; coastal/elevated"
+      },
+      {
+        "id": "frameless-glass",
+        "name": "Frameless Glass Panel",
+        "brand": "Custom Fabricated",
+        "type": "Structural Tempered Glass",
+        "unit": "per LF",
+        "wholesale": 185.0,
+        "retail": 240.0,
+        "offered": 270.0,
+        "notes": "Post-mounted standoff glass; custom-fabricated; most premium option"
+      }
+    ],
+    "waterproofing": [
+      {
+        "id": "trex-rainescape",
+        "name": "Trex RainEscape",
+        "brand": "Trex",
+        "type": "Above-Joist Trough (HDPE)",
+        "unit": "per SF",
+        "wholesale": 4.25,
+        "retail": 7.0,
+        "offered": 5.75,
+        "notes": "Market leader; installed before decking; feeds to downspouts; 10-yr warranty"
+      },
+      {
+        "id": "timbertech-dryspace",
+        "name": "TimberTech DrySpace",
+        "brand": "TimberTech",
+        "type": "Below-Joist Vinyl Ceiling",
+        "unit": "per SF",
+        "wholesale": 3.75,
+        "retail": 5.0,
+        "offered": 4.75,
+        "notes": "Retrofit-friendly; clips under existing deck; 25-yr warranty"
+      },
+      {
+        "id": "dek-drain",
+        "name": "DEK Drain",
+        "brand": "DEK Drain",
+        "type": "Below-Joist Rubber Membrane",
+        "unit": "per SF",
+        "wholesale": 3.5,
+        "retail": 5.5,
+        "offered": 4.5,
+        "notes": "Rubber membrane + cap strips; lifetime transferable warranty; retrofit OK"
+      },
+      {
+        "id": "wahoo-dryjoistez",
+        "name": "Wahoo DryJoist EZ",
+        "brand": "Wahoo Decks",
+        "type": "Above-Joist Structural",
+        "unit": "per SF",
+        "wholesale": 8.5,
+        "retail": 12.5,
+        "offered": 11.5,
+        "notes": "Structural drainage; commercial-grade; high-load capacity"
+      },
+      {
+        "id": "dexerdry",
+        "name": "DexerDry",
+        "brand": "DexerDry",
+        "type": "Above-Joist Membrane Roll",
+        "unit": "per SF",
+        "wholesale": 5.0,
+        "retail": 7.0,
+        "offered": 6.5,
+        "notes": "Roll-applied between joists before decking; compatible with major brands"
+      },
+      {
+        "id": "amazing-underdeck",
+        "name": "Amazing Underdeck",
+        "brand": "Amazing Underdeck",
+        "type": "Below-Joist Aluminum Ceiling",
+        "unit": "per SF",
+        "wholesale": 21.0,
+        "retail": 30.0,
+        "offered": 35.0,
+        "notes": "Finished aluminum ceiling (not just drainage); installed system; premium"
+      },
+      {
+        "id": "zip-system-deck",
+        "name": "ZIP System Deck Tape",
+        "brand": "Huber",
+        "type": "Above-Joist Membrane/Tape",
+        "unit": "per SF",
+        "wholesale": 2.0,
+        "retail": 2.75,
+        "offered": 2.5,
+        "notes": "Budget option; ZIP tape over joist sheathing; not a complete system"
+      },
+      {
+        "id": "aluminum-underdeck",
+        "name": "Aluminum T&G Underdeck",
+        "brand": "Various",
+        "type": "Below-Joist Aluminum Panels",
+        "unit": "per SF",
+        "wholesale": 8.0,
+        "retail": 10.5,
+        "offered": 10.0,
+        "notes": "Tongue-and-groove aluminum panels from below; mill or painted finish"
+      },
+      {
+        "id": "vinyl-underdeck",
+        "name": "Vinyl V-Panel Underdeck",
+        "brand": "Various",
+        "type": "Below-Joist Vinyl Panels",
+        "unit": "per SF",
+        "wholesale": 7.0,
+        "retail": 10.0,
+        "offered": 9.0,
+        "notes": "PVC V-groove panels under deck; affordable; watch slope for drainage"
+      },
+      {
+        "id": "landscape-gutter",
+        "name": "Membrane + Gutter (Budget)",
+        "brand": "DIY",
+        "type": "Flexible Membrane",
+        "unit": "per SF",
+        "wholesale": 1.0,
+        "retail": 1.75,
+        "offered": 1.5,
+        "notes": "Budget retrofit; fabric stapled over joists + gutter; no finished look"
+      }
+    ],
+    "screening": [
+      {
+        "id": "screen-tight-original",
+        "name": "Screen Tight Original",
+        "brand": "Screen Tight",
+        "type": "PVC Spline-Track",
+        "unit": "per LF",
+        "wholesale": 1.25,
+        "retail": 2.15,
+        "offered": 2.5,
+        "notes": "Most widely used system; PVC base + cap strip; HD/Lowe's; kits ~$275"
+      },
+      {
+        "id": "screeneze-original",
+        "name": "ScreenEze Original",
+        "brand": "ScreenEze",
+        "type": "Aluminum No-Spline",
+        "unit": "per LF",
+        "wholesale": 3.0,
+        "retail": 4.25,
+        "offered": 5.0,
+        "notes": "No spline needed; screen locks into extrusion; clean look"
+      },
+      {
+        "id": "screeneze-ultimate",
+        "name": "ScreenEze Ultimate",
+        "brand": "ScreenEze",
+        "type": "Aluminum No-Spline (HD)",
+        "unit": "per LF",
+        "wholesale": 4.25,
+        "retail": 6.0,
+        "offered": 7.0,
+        "notes": "Heavy-duty; wider track; better for large spans & windy locations"
+      },
+      {
+        "id": "pca-ek100",
+        "name": "PCA EK-100 Enclosure Kit",
+        "brand": "PCA Products",
+        "type": "Aluminum Door/Frame",
+        "unit": "per unit",
+        "wholesale": 102.0,
+        "retail": 165.0,
+        "offered": 225.0,
+        "notes": "Aluminum screen door systems; 70+ styles; 6 colors; USA-made"
+      },
+      {
+        "id": "phantom-classic",
+        "name": "Phantom Classic (Manual)",
+        "brand": "Phantom Screens",
+        "type": "Manual Retractable",
+        "unit": "per unit",
+        "wholesale": 475.0,
+        "retail": 700.0,
+        "offered": 950.0,
+        "notes": "Spring-retracted; custom-built to opening; contractor-installed only"
+      },
+      {
+        "id": "phantom-executive",
+        "name": "Phantom Executive (Motorized)",
+        "brand": "Phantom Screens",
+        "type": "Motorized Retractable",
+        "unit": "per unit",
+        "wholesale": 2000.0,
+        "retail": 3500.0,
+        "offered": 4500.0,
+        "notes": "Motorized; custom up to 40ft wide; requires 110V; premium"
+      },
+      {
+        "id": "apollo-motorized",
+        "name": "Apollo Motorized Screen",
+        "brand": "Apollo Screen",
+        "type": "Motorized Retractable",
+        "unit": "per unit",
+        "wholesale": 1600.0,
+        "retail": 2750.0,
+        "offered": 3750.0,
+        "notes": "Up to 30ft wide; 7-yr motor/15-yr fabric warranty; price-stable 2025"
+      },
+      {
+        "id": "lifestyle-screen",
+        "name": "Lifestyle Garage/Porch Screen",
+        "brand": "Lifestyle Screens",
+        "type": "Motorized Retractable",
+        "unit": "per unit",
+        "wholesale": 1400.0,
+        "retail": 2400.0,
+        "offered": 3250.0,
+        "notes": "Great for large openings up to 20ft; heavy-duty mesh"
+      },
+      {
+        "id": "eze-breeze",
+        "name": "Eze-Breeze 4-Track Panels",
+        "brand": "Eze-Breeze (PGT)",
+        "type": "Vinyl Sliding Panels",
+        "unit": "per panel",
+        "wholesale": 285.0,
+        "retail": 400.0,
+        "offered": 550.0,
+        "notes": "Not screen \u2014 vinyl glazed panels; creates 3-season room; very popular SE US"
+      },
+      {
+        "id": "screenmobile-custom",
+        "name": "Screenmobile Custom",
+        "brand": "Screenmobile",
+        "type": "Custom Aluminum Frame",
+        "unit": "per SF",
+        "wholesale": 4.5,
+        "retail": 9.5,
+        "offered": 14.0,
+        "notes": "Mobile franchise; comes to site; price includes frame + screen + labor"
+      },
+      {
+        "id": "aluminum-site-built",
+        "name": "Site-Built Aluminum Frame",
+        "brand": "Custom",
+        "type": "Aluminum Frame + Screen",
+        "unit": "per SF",
+        "wholesale": 5.5,
+        "retail": 11.0,
+        "offered": 18.0,
+        "notes": "Contractor-built on-site; most durable; paintable; common for large porches"
+      },
+      {
+        "id": "phifer-fiberglass",
+        "name": "Phifer Fiberglass Screen (fabric only)",
+        "brand": "Phifer",
+        "type": "Screen Fabric",
+        "unit": "per SF",
+        "wholesale": 0.2,
+        "retail": 0.45,
+        "offered": 0.35,
+        "notes": "Raw screen material; use with Screen Tight/ScreenEze; solar/pet = $0.60-1.20"
+      }
+    ]
+  },
+  "selections": {
+    "decking": "trex-transcend",
+    "railing": "trex-signature-rail",
+    "waterproofing": "trex-rainescape",
+    "screening": "screen-tight-original"
+  },
+  "quantities": {
+    "deck_sqft": 400,
+    "deck_board_lf": 1200,
+    "railing_lf": 85,
+    "underporch_sqft": 400,
+    "screening_lf": 75,
+    "screen_panels": 0,
+    "stairs_count": 1,
+    "stair_treads_lf": 36
+  },
+  "structural": {
+    "items": [
+      {
+        "name": "Pressure-treated joists (2x10x12)",
+        "qty": 28,
+        "wholesale": 14.5,
+        "retail": 22.0,
+        "offered": 17.5,
+        "unit": "each"
+      },
+      {
+        "name": "Beam lumber (2x10 doubled)",
+        "qty": 4,
+        "wholesale": 18.0,
+        "retail": 28.0,
+        "offered": 22.0,
+        "unit": "each"
+      },
+      {
+        "name": "6x6 posts",
+        "qty": 6,
+        "wholesale": 28.0,
+        "retail": 42.0,
+        "offered": 34.0,
+        "unit": "each"
+      },
+      {
+        "name": "Post bases / brackets",
+        "qty": 6,
+        "wholesale": 12.0,
+        "retail": 22.0,
+        "offered": 16.0,
+        "unit": "each"
+      },
+      {
+        "name": "Joist hangers",
+        "qty": 56,
+        "wholesale": 1.8,
+        "retail": 3.5,
+        "offered": 2.4,
+        "unit": "each"
+      },
+      {
+        "name": "Ledger board + flashing",
+        "qty": 1,
+        "wholesale": 85.0,
+        "retail": 140.0,
+        "offered": 110.0,
+        "unit": "lot"
+      },
+      {
+        "name": "Concrete footings/piers",
+        "qty": 6,
+        "wholesale": 45.0,
+        "retail": 75.0,
+        "offered": 58.0,
+        "unit": "each"
+      },
+      {
+        "name": "Structural screws & hardware",
+        "qty": 1,
+        "wholesale": 180.0,
+        "retail": 280.0,
+        "offered": 220.0,
+        "unit": "lot"
+      },
+      {
+        "name": "Hidden fastener system",
+        "qty": 1,
+        "wholesale": 220.0,
+        "retail": 350.0,
+        "offered": 275.0,
+        "unit": "lot"
+      },
+      {
+        "name": "Tongue-and-groove wood ceiling (underporch)",
+        "qty": 400,
+        "wholesale": 3.25,
+        "retail": 5.5,
+        "offered": 4.25,
+        "unit": "per SF"
+      },
+      {
+        "name": "Ceiling stain / sealer (T&G)",
+        "qty": 400,
+        "wholesale": 0.4,
+        "retail": 0.75,
+        "offered": 0.55,
+        "unit": "per SF"
+      }
+    ]
+  },
+  "labor": {
+    "items": [
+      {
+        "name": "Demo & haul-off (existing deck)",
+        "hours": 16,
+        "rate": 65.0,
+        "total": 1040.0
+      },
+      {
+        "name": "Framing & structural",
+        "hours": 32,
+        "rate": 75.0,
+        "total": 2400.0
+      },
+      {
+        "name": "Decking installation",
+        "hours": 24,
+        "rate": 70.0,
+        "total": 1680.0
+      },
+      {
+        "name": "Railing installation",
+        "hours": 12,
+        "rate": 70.0,
+        "total": 840.0
+      },
+      {
+        "name": "Waterproofing system install",
+        "hours": 16,
+        "rate": 70.0,
+        "total": 1120.0
+      },
+      {
+        "name": "Underporch screening",
+        "hours": 12,
+        "rate": 65.0,
+        "total": 780.0
+      },
+      {
+        "name": "Stair build & install",
+        "hours": 8,
+        "rate": 75.0,
+        "total": 600.0
+      },
+      {
+        "name": "Electrical rough-in (fan/lights)",
+        "hours": 6,
+        "rate": 85.0,
+        "total": 510.0
+      },
+      {
+        "name": "Final trim & punch list",
+        "hours": 8,
+        "rate": 65.0,
+        "total": 520.0
+      },
+      {
+        "name": "T&G ceiling installation (underporch)",
+        "hours": 16,
+        "rate": 70.0,
+        "total": 1120.0
+      }
+    ]
+  },
+  "permits": {
+    "items": [
+      {
+        "name": "Building permit",
+        "cost": 350.0,
+        "notes": "Required \u2014 structural deck replacement"
+      },
+      {
+        "name": "Electrical permit",
+        "cost": 125.0,
+        "notes": "If adding fan/lights to underporch"
+      },
+      {
+        "name": "HOA architectural review",
+        "cost": 0.0,
+        "notes": "Check if applicable \u2014 may require submittal"
+      },
+      {
+        "name": "Engineering / load calcs",
+        "cost": 400.0,
+        "notes": "May be required by municipality for underporch"
+      }
+    ]
+  },
+  "out_of_scope": [
+    {
+      "name": "Landscaping repair / grading",
+      "est_cost": "500 - 1,500",
+      "notes": "Ground disturbance around footings may need landscape restoration"
+    },
+    {
+      "name": "Gutter / downspout reroute",
+      "est_cost": "300 - 800",
+      "notes": "If waterproofing system requires new drainage path"
+    },
+    {
+      "name": "Ceiling fan + light fixtures",
+      "est_cost": "200 - 600",
+      "notes": "Shown in render \u2014 fixture cost not included in base scope. Electrical labor IS included."
+    },
+    {
+      "name": "Underporch flooring (pavers/concrete)",
+      "est_cost": "1,500 - 4,000",
+      "notes": "Existing surface may need improvement for living space use"
+    },
+    {
+      "name": "Outdoor furniture / furnishings",
+      "est_cost": "Varies",
+      "notes": "Not part of construction scope"
+    },
+    {
+      "name": "Pest / termite treatment",
+      "est_cost": "200 - 500",
+      "notes": "Recommended before closing in underporch"
+    },
+    {
+      "name": "Paint / stain on structural lumber",
+      "est_cost": "300 - 600",
+      "notes": "PT lumber can be left natural or painted \u2014 add-on if desired"
+    },
+    {
+      "name": "Pergola or shade structure",
+      "est_cost": "2,000 - 8,000",
+      "notes": "Popular add-on for upper deck"
+    },
+    {
+      "name": "Area rug (outdoor rated)",
+      "est_cost": "150 - 400",
+      "notes": "Shown in render \u2014 decorative, not construction"
+    }
+  ]
+}

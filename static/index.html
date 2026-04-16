@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deck Replacement Cost Calculator</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    [x-cloak] { display: none !important; }
+    :root {
+      --brand: #2d4a3e;
+      --brand-light: #3d6b5a;
+      --accent: #c8965d;
+      --accent-light: #e0b98a;
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f1ec; color: #2c2c2c; }
+    .brand-bg { background-color: var(--brand); }
+    .brand-text { color: var(--brand); }
+    .accent-bg { background-color: var(--accent); }
+    .accent-text { color: var(--accent); }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04); }
+    .card-header { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%); color: white; padding: 16px 24px; border-radius: 12px 12px 0 0; }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .pill-wholesale { background: #dbeafe; color: #1e40af; }
+    .pill-retail { background: #fce7f3; color: #9d174d; }
+    .pill-offered { background: #d1fae5; color: #065f46; }
+    .savings-badge { background: linear-gradient(135deg, #065f46, #059669); color: white; }
+    .tab-active { border-bottom: 3px solid var(--accent); color: var(--brand); font-weight: 600; }
+    .tab-inactive { border-bottom: 3px solid transparent; color: #888; }
+    .tab-inactive:hover { color: var(--brand); border-color: #ccc; }
+    .product-card { border: 2px solid #e5e7eb; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; }
+    .product-card:hover { border-color: var(--accent); }
+    .product-card.selected { border-color: var(--brand); background: #f0fdf4; box-shadow: 0 0 0 1px var(--brand); }
+    .img-thumb { width: 120px; height: 90px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb; cursor: pointer; transition: 0.15s; }
+    .img-thumb:hover { border-color: var(--accent); transform: scale(1.03); }
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; }
+    .number-input { width: 90px; text-align: right; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 8px; }
+    .number-input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2px rgba(45,74,62,0.15); }
+    .hero-gradient { background: linear-gradient(135deg, #2d4a3e 0%, #3d6b5a 40%, #5a8a72 100%); }
+    .edit-input { border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 8px; background: #fffef8; }
+    .edit-input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2px rgba(45,74,62,0.15); }
+    .edit-input-text { width: 100%; }
+    .edit-input-num { width: 85px; text-align: right; }
+    .pencil-btn { color: #9ca3af; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.15s; }
+    .pencil-btn:hover { color: var(--brand); background: #f0fdf4; }
+    .done-btn { color: #059669; cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.15s; }
+    .done-btn:hover { color: #065f46; background: #d1fae5; }
+    .row-editing { background: #fffef8; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+      .card { box-shadow: none; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body x-data="deckApp()" x-init="init()" x-cloak>
+
+  <!-- Hero -->
+  <header class="hero-gradient text-white py-8 px-6 no-print">
+    <div class="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Deck Replacement</h1>
+        <p class="text-green-200 mt-1 text-lg">Cost Calculator & Product Comparison</p>
+      </div>
+      <div class="flex gap-3">
+        <button @click="window.print()" class="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 text-sm font-medium">
+          Print / PDF
+        </button>
+        <button @click="saveAll()" class="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 text-sm font-medium"
+                :class="dirty ? 'ring-2 ring-yellow-300' : ''">
+          Save
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50 no-print">
+    <div class="max-w-6xl mx-auto flex gap-1 px-4 overflow-x-auto">
+      <template x-for="t in tabs" :key="t.id">
+        <button @click="tab = t.id" class="px-4 py-3 text-sm whitespace-nowrap transition-all"
+                :class="tab === t.id ? 'tab-active' : 'tab-inactive'" x-text="t.label"></button>
+      </template>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+    <!-- ============ OVERVIEW TAB ============ -->
+    <section x-show="tab === 'overview'">
+      <div class="card">
+        <div class="card-header flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Project Overview</h2>
+          <div class="flex items-center gap-3">
+            <span class="text-green-200 text-sm">Water-Tight Deck + Screened Underporch</span>
+            <button @click="editing.overview = !editing.overview" class="no-print">
+              <svg x-show="!editing.overview" class="w-4 h-4 text-green-200 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <svg x-show="editing.overview" class="w-5 h-5 text-green-300 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-6 grid md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <!-- Read mode -->
+            <template x-if="!editing.overview">
+              <div class="space-y-3">
+                <div>
+                  <div class="text-xs text-gray-400 uppercase tracking-wide">Project Name</div>
+                  <div class="font-medium" x-text="data.project.name || '—'"></div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400 uppercase tracking-wide">Description</div>
+                  <div class="text-sm text-gray-700" x-text="data.project.description || '—'"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-xs text-gray-400 uppercase tracking-wide">Contractor</div>
+                    <div class="text-sm" x-text="data.project.contractor || '—'"></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 uppercase tracking-wide">Address</div>
+                    <div class="text-sm" x-text="data.project.address || '—'"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-xs text-gray-400 uppercase tracking-wide">Est. Start</div>
+                    <div class="text-sm" x-text="data.project.start_date || '—'"></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 uppercase tracking-wide">Est. Completion</div>
+                    <div class="text-sm" x-text="data.project.completion_date || '—'"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <!-- Edit mode -->
+            <template x-if="editing.overview">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-1">Project Name</label>
+                  <input x-model="data.project.name" @input="dirty=true" class="w-full edit-input">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-1">Description</label>
+                  <textarea x-model="data.project.description" @input="dirty=true" rows="3" class="w-full edit-input"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Contractor</label>
+                    <input x-model="data.project.contractor" @input="dirty=true" class="w-full edit-input">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Address</label>
+                    <input x-model="data.project.address" @input="dirty=true" class="w-full edit-input">
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Est. Start</label>
+                    <input type="date" x-model="data.project.start_date" @input="dirty=true" class="w-full edit-input">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Est. Completion</label>
+                    <input type="date" x-model="data.project.completion_date" @input="dirty=true" class="w-full edit-input">
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+          <!-- Quantities -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-gray-700">Project Dimensions</h3>
+              <button @click="editing.quantities = !editing.quantities" class="no-print">
+                <svg x-show="!editing.quantities" class="w-4 h-4 pencil-btn" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                <svg x-show="editing.quantities" class="w-5 h-5 done-btn" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              </button>
+            </div>
+            <div class="space-y-3">
+              <template x-for="[key, label] in quantityLabels" :key="key">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600" x-text="label"></span>
+                  <span x-show="!editing.quantities" class="text-sm font-medium" x-text="(data.quantities[key] || 0).toLocaleString()"></span>
+                  <input x-show="editing.quantities" type="number" x-model.number="data.quantities[key]" @input="dirty=true" class="edit-input-num">
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Gallery -->
+      <div class="card mt-6">
+        <div class="card-header">
+          <h2 class="text-xl font-semibold">Project Images</h2>
+        </div>
+        <div class="p-6 grid md:grid-cols-2 gap-8">
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Current Deck
+            </h3>
+            <div class="flex flex-wrap gap-3 mb-3">
+              <template x-for="(img, i) in data.images.current" :key="img">
+                <div class="relative group">
+                  <img :src="img" class="img-thumb" @click="lightboxImg = img">
+                  <button @click="removeImage('current', i)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition no-print">x</button>
+                </div>
+              </template>
+              <div x-show="data.images.current.length === 0" class="text-gray-400 text-sm italic py-8 text-center w-full border-2 border-dashed rounded-lg">No images yet — upload photos of existing deck</div>
+            </div>
+            <label class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer text-sm font-medium no-print">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              Upload
+              <input type="file" accept="image/*" multiple class="hidden" @change="uploadImages($event, 'current')">
+            </label>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              Desired Outcome (AI Renders)
+            </h3>
+            <div class="flex flex-wrap gap-3 mb-3">
+              <template x-for="(img, i) in data.images.rendered" :key="img">
+                <div class="relative group">
+                  <img :src="img" class="img-thumb" @click="lightboxImg = img">
+                  <button @click="removeImage('rendered', i)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition no-print">x</button>
+                </div>
+              </template>
+              <div x-show="data.images.rendered.length === 0" class="text-gray-400 text-sm italic py-8 text-center w-full border-2 border-dashed rounded-lg">No renders yet — upload AI-generated images</div>
+            </div>
+            <label class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer text-sm font-medium no-print">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              Upload
+              <input type="file" accept="image/*" multiple class="hidden" @change="uploadImages($event, 'rendered')">
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRODUCTS TAB ============ -->
+    <section x-show="tab === 'products'">
+      <template x-for="cat in productCategories" :key="cat.key">
+        <div class="card mb-6">
+          <div class="card-header flex items-center justify-between">
+            <h2 class="text-xl font-semibold" x-text="cat.label"></h2>
+            <div class="flex items-center gap-3">
+              <span class="text-green-200 text-sm" x-text="'Selected: ' + selectedProductName(cat.key)"></span>
+              <button @click="toggleEditProduct(cat.key)" class="no-print">
+                <svg x-show="!editing.products[cat.key]" class="w-4 h-4 text-green-200 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                <svg x-show="editing.products[cat.key]" class="w-5 h-5 text-green-300 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
+            <!-- Filter bar -->
+            <div class="flex flex-wrap gap-3 mb-4 items-center no-print">
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-medium text-gray-500 uppercase">Brand:</label>
+                <select x-model="filters[cat.key].brand" class="text-sm border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-800">
+                  <option value="">All Brands</option>
+                  <template x-for="b in uniqueBrands(cat.key)" :key="b">
+                    <option :value="b" x-text="b"></option>
+                  </template>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-medium text-gray-500 uppercase">Type:</label>
+                <select x-model="filters[cat.key].type" class="text-sm border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-800">
+                  <option value="">All Types</option>
+                  <template x-for="t in uniqueTypes(cat.key)" :key="t">
+                    <option :value="t" x-text="t"></option>
+                  </template>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-medium text-gray-500 uppercase">Sort:</label>
+                <select x-model="filters[cat.key].sort" class="text-sm border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-800">
+                  <option value="name">Name</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="savings">Best Savings %</option>
+                </select>
+              </div>
+              <span class="text-xs text-gray-400 ml-auto" x-text="filteredProducts(cat.key).length + ' of ' + data.product_options[cat.key].length + ' shown'"></span>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <template x-for="(p, pi) in filteredProducts(cat.key)" :key="p.id">
+                <div class="product-card" :class="data.selections[cat.key] === p.id ? 'selected' : ''"
+                     @click="data.selections[cat.key] = p.id; dirty = true">
+                  <div class="flex items-center justify-between mb-2">
+                    <!-- Read mode name -->
+                    <span x-show="!editing.products[cat.key]" class="font-semibold text-sm" x-text="p.name"></span>
+                    <!-- Edit mode name -->
+                    <input x-show="editing.products[cat.key]" x-model="p.name" @click.stop @input="dirty=true" class="edit-input edit-input-text text-sm font-semibold" placeholder="Product name">
+                    <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2"
+                         :class="data.selections[cat.key] === p.id ? 'border-green-800 bg-green-800' : 'border-gray-300'">
+                      <div class="w-2 h-2 rounded-full bg-white" x-show="data.selections[cat.key] === p.id"></div>
+                    </div>
+                  </div>
+                  <!-- Read mode meta -->
+                  <div x-show="!editing.products[cat.key]" class="text-xs text-gray-500 mb-3">
+                    <span x-text="p.brand"></span> &middot; <span x-text="p.type"></span>
+                  </div>
+                  <!-- Edit mode meta -->
+                  <div x-show="editing.products[cat.key]" class="flex gap-2 mb-3" @click.stop>
+                    <input x-model="p.brand" @input="dirty=true" class="edit-input text-xs w-1/2" placeholder="Brand">
+                    <input x-model="p.type" @input="dirty=true" class="edit-input text-xs w-1/2" placeholder="Type">
+                  </div>
+                  <!-- Pricing -->
+                  <div class="space-y-1 text-sm">
+                    <!-- Wholesale -->
+                    <div class="flex justify-between items-center">
+                      <span class="pill pill-wholesale">Wholesale</span>
+                      <span x-show="!editing.products[cat.key]" x-text="fmt(p.wholesale) + ' ' + p.unit"></span>
+                      <input x-show="editing.products[cat.key]" type="number" step="0.01" x-model.number="p.wholesale" @click.stop @input="dirty=true" class="edit-input-num text-sm">
+                    </div>
+                    <!-- Retail -->
+                    <div class="flex justify-between items-center">
+                      <span class="pill pill-retail">Retail</span>
+                      <span x-show="!editing.products[cat.key]" x-text="fmt(p.retail) + ' ' + p.unit"></span>
+                      <input x-show="editing.products[cat.key]" type="number" step="0.01" x-model.number="p.retail" @click.stop @input="dirty=true" class="edit-input-num text-sm">
+                    </div>
+                    <!-- Offered -->
+                    <div class="flex justify-between items-center">
+                      <span class="pill pill-offered">Offered</span>
+                      <span x-show="!editing.products[cat.key]" class="font-semibold" x-text="fmt(p.offered) + ' ' + p.unit"></span>
+                      <input x-show="editing.products[cat.key]" type="number" step="0.01" x-model.number="p.offered" @click.stop @input="dirty=true" class="edit-input-num text-sm font-semibold">
+                    </div>
+                    <!-- Unit (edit mode only) -->
+                    <div x-show="editing.products[cat.key]" class="flex justify-between items-center" @click.stop>
+                      <span class="text-xs text-gray-400">Unit</span>
+                      <input x-model="p.unit" @input="dirty=true" class="edit-input text-xs w-24 text-right" placeholder="per LF">
+                    </div>
+                  </div>
+                  <div class="mt-3 text-xs text-gray-500 flex items-center justify-between">
+                    <span x-show="!editing.products[cat.key]" x-text="p.notes"></span>
+                    <input x-show="editing.products[cat.key]" x-model="p.notes" @click.stop @input="dirty=true" class="edit-input text-xs flex-1 mr-2" placeholder="Notes">
+                    <span class="pill savings-badge ml-2 flex-shrink-0" x-text="savingsPct(p.retail, p.offered) + '% off retail'"></span>
+                  </div>
+                  <!-- Delete button in edit mode -->
+                  <div x-show="editing.products[cat.key]" class="mt-2 text-right" @click.stop>
+                    <button @click="removeProduct(cat.key, p.id)" class="text-xs text-red-400 hover:text-red-600">Remove product</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <!-- Add custom product -->
+            <div class="mt-4 no-print">
+              <button @click="cat._adding = !cat._adding" class="text-sm text-green-800 hover:underline font-medium">
+                + Add custom <span x-text="cat.label.toLowerCase()"></span> option
+              </button>
+              <div x-show="cat._adding" class="mt-3 p-4 bg-gray-50 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-3">
+                <input x-model="cat._new.name" placeholder="Product name" class="border rounded px-2 py-1 text-sm col-span-2">
+                <input x-model="cat._new.brand" placeholder="Brand" class="border rounded px-2 py-1 text-sm">
+                <input x-model="cat._new.type" placeholder="Type" class="border rounded px-2 py-1 text-sm">
+                <input x-model.number="cat._new.wholesale" placeholder="Wholesale $" type="number" step="0.01" class="border rounded px-2 py-1 text-sm">
+                <input x-model.number="cat._new.retail" placeholder="Retail $" type="number" step="0.01" class="border rounded px-2 py-1 text-sm">
+                <input x-model.number="cat._new.offered" placeholder="Offered $" type="number" step="0.01" class="border rounded px-2 py-1 text-sm">
+                <input x-model="cat._new.unit" placeholder="Unit (per LF, per SF)" class="border rounded px-2 py-1 text-sm">
+                <input x-model="cat._new.notes" placeholder="Notes" class="border rounded px-2 py-1 text-sm col-span-2">
+                <button @click="addProduct(cat)" class="px-3 py-1 brand-bg text-white rounded text-sm font-medium">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <!-- ============ MATERIALS TAB ============ -->
+    <section x-show="tab === 'materials'">
+      <!-- Selected Products Material Costs -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h2 class="text-xl font-semibold">Selected Materials — Price Breakdown</h2>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="text-left py-2 pr-4">Material</th>
+                <th class="text-left py-2">Product</th>
+                <th class="text-right py-2">Qty</th>
+                <th class="text-right py-2"><span class="pill pill-wholesale">Wholesale</span></th>
+                <th class="text-right py-2"><span class="pill pill-retail">Retail</span></th>
+                <th class="text-right py-2"><span class="pill pill-offered">Offered</span></th>
+                <th class="text-right py-2">Savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="row in materialRows()" :key="row.category">
+                <tr class="border-b border-gray-100">
+                  <td class="py-3 pr-4 font-medium capitalize" x-text="row.category"></td>
+                  <td class="py-3 text-gray-600" x-text="row.product"></td>
+                  <td class="py-3 text-right" x-text="row.qty.toLocaleString() + ' ' + row.unit"></td>
+                  <td class="py-3 text-right" x-text="fmt(row.wholesale_total)"></td>
+                  <td class="py-3 text-right" x-text="fmt(row.retail_total)"></td>
+                  <td class="py-3 text-right font-semibold" x-text="fmt(row.offered_total)"></td>
+                  <td class="py-3 text-right text-green-700 font-medium" x-text="fmt(row.retail_total - row.offered_total)"></td>
+                </tr>
+              </template>
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-gray-300 font-bold">
+                <td class="py-3" colspan="3">Selected Materials Subtotal</td>
+                <td class="py-3 text-right" x-text="fmt(materialTotals().wholesale)"></td>
+                <td class="py-3 text-right" x-text="fmt(materialTotals().retail)"></td>
+                <td class="py-3 text-right text-green-800" x-text="fmt(materialTotals().offered)"></td>
+                <td class="py-3 text-right text-green-700" x-text="fmt(materialTotals().retail - materialTotals().offered)"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Structural / Hardware -->
+      <div class="card">
+        <div class="card-header flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Structural & Hardware</h2>
+          <div class="flex items-center gap-3 no-print">
+            <button @click="addStructuralItem()" class="text-green-200 hover:text-white text-sm">+ Add Item</button>
+            <button @click="editing.structural = !editing.structural">
+              <svg x-show="!editing.structural" class="w-4 h-4 text-green-200 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <svg x-show="editing.structural" class="w-5 h-5 text-green-300 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="text-left py-2">Item</th>
+                <th class="text-right py-2">Qty</th>
+                <th class="text-right py-2">Unit</th>
+                <th class="text-right py-2"><span class="pill pill-wholesale">Wholesale</span></th>
+                <th class="text-right py-2"><span class="pill pill-retail">Retail</span></th>
+                <th class="text-right py-2"><span class="pill pill-offered">Offered</span></th>
+                <th class="text-right py-2">Ext. Offered</th>
+                <th class="w-8 no-print"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="(item, i) in data.structural.items" :key="i">
+                <tr class="border-b border-gray-100" :class="editing.structural ? 'row-editing' : ''">
+                  <!-- Item name -->
+                  <td class="py-2">
+                    <span x-show="!editing.structural" x-text="item.name"></span>
+                    <input x-show="editing.structural" x-model="item.name" @input="dirty=true" class="edit-input edit-input-text">
+                  </td>
+                  <!-- Qty -->
+                  <td class="py-2 text-right">
+                    <span x-show="!editing.structural" x-text="item.qty"></span>
+                    <input x-show="editing.structural" type="number" x-model.number="item.qty" @input="dirty=true" class="edit-input-num w-16">
+                  </td>
+                  <!-- Unit -->
+                  <td class="py-2 text-right text-gray-500 text-xs">
+                    <span x-show="!editing.structural" x-text="item.unit"></span>
+                    <input x-show="editing.structural" x-model="item.unit" @input="dirty=true" class="edit-input text-xs w-16 text-right">
+                  </td>
+                  <!-- Wholesale -->
+                  <td class="py-2 text-right">
+                    <span x-show="!editing.structural" x-text="fmt(item.wholesale)"></span>
+                    <input x-show="editing.structural" type="number" step="0.01" x-model.number="item.wholesale" @input="dirty=true" class="edit-input-num">
+                  </td>
+                  <!-- Retail -->
+                  <td class="py-2 text-right">
+                    <span x-show="!editing.structural" x-text="fmt(item.retail)"></span>
+                    <input x-show="editing.structural" type="number" step="0.01" x-model.number="item.retail" @input="dirty=true" class="edit-input-num">
+                  </td>
+                  <!-- Offered -->
+                  <td class="py-2 text-right">
+                    <span x-show="!editing.structural" class="font-medium" x-text="fmt(item.offered)"></span>
+                    <input x-show="editing.structural" type="number" step="0.01" x-model.number="item.offered" @input="dirty=true" class="edit-input-num">
+                  </td>
+                  <!-- Extended -->
+                  <td class="py-2 text-right font-medium" x-text="fmt(item.qty * item.offered)"></td>
+                  <!-- Delete -->
+                  <td class="py-2 no-print">
+                    <button x-show="editing.structural" @click="data.structural.items.splice(i,1); dirty=true" class="text-red-400 hover:text-red-600 text-xs">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-gray-300 font-bold">
+                <td class="py-3" colspan="3">Structural Subtotal</td>
+                <td class="py-3 text-right" x-text="fmt(structuralTotals().wholesale)"></td>
+                <td class="py-3 text-right" x-text="fmt(structuralTotals().retail)"></td>
+                <td class="py-3 text-right" x-text="fmt(structuralTotals().offered)"></td>
+                <td class="py-3 text-right text-green-800" x-text="fmt(structuralTotals().ext_offered)"></td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LABOR TAB ============ -->
+    <section x-show="tab === 'labor'">
+      <div class="card">
+        <div class="card-header flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Labor Breakdown</h2>
+          <div class="flex items-center gap-3 no-print">
+            <button @click="addLaborItem()" class="text-green-200 hover:text-white text-sm">+ Add Item</button>
+            <button @click="editing.labor = !editing.labor">
+              <svg x-show="!editing.labor" class="w-4 h-4 text-green-200 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <svg x-show="editing.labor" class="w-5 h-5 text-green-300 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="text-left py-2">Task</th>
+                <th class="text-right py-2">Hours</th>
+                <th class="text-right py-2">Rate ($/hr)</th>
+                <th class="text-right py-2">Total</th>
+                <th class="w-8 no-print"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="(item, i) in data.labor.items" :key="i">
+                <tr class="border-b border-gray-100" :class="editing.labor ? 'row-editing' : ''">
+                  <!-- Task name -->
+                  <td class="py-2">
+                    <span x-show="!editing.labor" x-text="item.name"></span>
+                    <input x-show="editing.labor" x-model="item.name" @input="dirty=true" class="edit-input edit-input-text">
+                  </td>
+                  <!-- Hours -->
+                  <td class="py-2 text-right">
+                    <span x-show="!editing.labor" x-text="item.hours"></span>
+                    <input x-show="editing.labor" type="number" x-model.number="item.hours" @input="item.total = item.hours * item.rate; dirty=true" class="edit-input-num w-20">
+                  </td>
+                  <!-- Rate -->
+                  <td class="py-2 text-right">
+                    <span x-show="!editing.labor" x-text="fmt(item.rate)"></span>
+                    <input x-show="editing.labor" type="number" step="0.01" x-model.number="item.rate" @input="item.total = item.hours * item.rate; dirty=true" class="edit-input-num">
+                  </td>
+                  <!-- Total -->
+                  <td class="py-2 text-right font-medium" x-text="fmt(item.total)"></td>
+                  <!-- Delete -->
+                  <td class="py-2 no-print">
+                    <button x-show="editing.labor" @click="data.labor.items.splice(i,1); dirty=true" class="text-red-400 hover:text-red-600">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-gray-300 font-bold text-lg">
+                <td class="py-3">Labor Total</td>
+                <td class="py-3 text-right" x-text="laborTotals().hours + ' hrs'"></td>
+                <td class="py-3"></td>
+                <td class="py-3 text-right text-green-800" x-text="fmt(laborTotals().total)"></td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <!-- Labor vs Materials visual -->
+        <div class="px-6 pb-6">
+          <h3 class="text-sm font-semibold text-gray-600 mb-2">Labor vs. Materials Split</h3>
+          <div class="flex rounded-full overflow-hidden h-8 text-xs font-bold text-white">
+            <div class="flex items-center justify-center brand-bg transition-all" :style="'width:' + laborPct() + '%'" x-text="laborPct() + '% Labor'"></div>
+            <div class="flex items-center justify-center accent-bg transition-all" :style="'width:' + (100 - laborPct()) + '%'" x-text="(100 - laborPct()) + '% Materials'"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PERMITS TAB ============ -->
+    <section x-show="tab === 'permits'">
+      <div class="card">
+        <div class="card-header flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Permits & Fees</h2>
+          <div class="flex items-center gap-3 no-print">
+            <button @click="addPermitItem()" class="text-green-200 hover:text-white text-sm">+ Add Item</button>
+            <button @click="editing.permits = !editing.permits">
+              <svg x-show="!editing.permits" class="w-4 h-4 text-green-200 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <svg x-show="editing.permits" class="w-5 h-5 text-green-300 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="space-y-4">
+            <template x-for="(item, i) in data.permits.items" :key="i">
+              <div class="flex items-start gap-4 border-b border-gray-100 pb-4" :class="editing.permits ? 'row-editing rounded-lg p-3' : ''">
+                <div class="flex-1">
+                  <!-- Read mode -->
+                  <div x-show="!editing.permits">
+                    <div class="font-medium" x-text="item.name"></div>
+                    <div class="text-sm text-gray-500" x-text="item.notes"></div>
+                  </div>
+                  <!-- Edit mode -->
+                  <div x-show="editing.permits" class="space-y-2">
+                    <input x-model="item.name" @input="dirty=true" class="edit-input edit-input-text font-medium">
+                    <input x-model="item.notes" @input="dirty=true" class="edit-input edit-input-text text-sm">
+                  </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <span x-show="!editing.permits" class="font-semibold" x-text="fmt(item.cost)"></span>
+                  <input x-show="editing.permits" type="number" step="1" x-model.number="item.cost" @input="dirty=true" class="edit-input-num w-28">
+                </div>
+                <button x-show="editing.permits" @click="data.permits.items.splice(i,1); dirty=true" class="text-red-400 hover:text-red-600 mt-1 no-print">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </template>
+          </div>
+          <div class="mt-6 flex justify-between items-center border-t-2 border-gray-300 pt-4">
+            <span class="font-bold text-lg">Permits Total</span>
+            <span class="font-bold text-lg text-green-800" x-text="fmt(permitTotal())"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCOPE TAB ============ -->
+    <section x-show="tab === 'scope'">
+      <div class="card">
+        <div class="card-header flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Out of Scope / Add-Ons</h2>
+          <div class="flex items-center gap-3 no-print">
+            <button @click="addScopeItem()" class="text-green-200 hover:text-white text-sm">+ Add Item</button>
+            <button @click="editing.scope = !editing.scope">
+              <svg x-show="!editing.scope" class="w-4 h-4 text-green-200 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <svg x-show="editing.scope" class="w-5 h-5 text-green-300 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <p class="text-sm text-gray-500 mb-4">These items are <strong>not included</strong> in the base project cost. Estimated ranges provided for planning purposes.</p>
+          <div class="space-y-3">
+            <template x-for="(item, i) in data.out_of_scope" :key="i">
+              <div class="flex items-start gap-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="flex-shrink-0 mt-1">
+                  <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <!-- Read mode -->
+                  <div x-show="!editing.scope">
+                    <div class="font-semibold" x-text="item.name"></div>
+                    <div class="text-sm text-gray-600" x-text="item.notes"></div>
+                  </div>
+                  <!-- Edit mode -->
+                  <div x-show="editing.scope" class="space-y-2">
+                    <input x-model="item.name" @input="dirty=true" class="edit-input edit-input-text font-semibold">
+                    <input x-model="item.notes" @input="dirty=true" class="edit-input edit-input-text text-sm">
+                  </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <div class="text-sm text-gray-500">Est. Range</div>
+                  <span x-show="!editing.scope" class="font-medium" x-text="'$' + item.est_cost"></span>
+                  <input x-show="editing.scope" x-model="item.est_cost" @input="dirty=true" class="edit-input text-right w-32 font-medium">
+                </div>
+                <button x-show="editing.scope" @click="data.out_of_scope.splice(i,1); dirty=true" class="text-red-400 hover:text-red-600 mt-1 no-print">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SUMMARY TAB ============ -->
+    <section x-show="tab === 'summary'">
+      <!-- Grand total cards -->
+      <div class="grid md:grid-cols-3 gap-6 mb-6">
+        <div class="card p-6 text-center">
+          <div class="text-sm font-medium text-gray-500 mb-1">Total at Retail</div>
+          <div class="text-3xl font-bold text-gray-400 line-through" x-text="fmt(grandTotal('retail'))"></div>
+        </div>
+        <div class="card p-6 text-center border-2 border-green-700">
+          <div class="text-sm font-medium text-green-800 mb-1">Your Price (Offered)</div>
+          <div class="text-3xl font-bold brand-text" x-text="fmt(grandTotal('offered'))"></div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-sm font-medium text-gray-500 mb-1">Total Savings</div>
+          <div class="text-3xl font-bold text-green-600" x-text="fmt(grandTotal('retail') - grandTotal('offered'))"></div>
+          <div class="text-sm text-green-600 mt-1" x-text="savingsPct(grandTotal('retail'), grandTotal('offered')) + '% below retail'"></div>
+        </div>
+      </div>
+
+      <!-- Detailed breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="text-xl font-semibold">Complete Cost Summary</h2>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="text-left py-2">Category</th>
+                <th class="text-right py-2"><span class="pill pill-wholesale">Wholesale</span></th>
+                <th class="text-right py-2"><span class="pill pill-retail">Retail</span></th>
+                <th class="text-right py-2"><span class="pill pill-offered">Offered</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-gray-100">
+                <td class="py-3 font-medium">Selected Materials (Decking, Rail, Waterproofing, Screen)</td>
+                <td class="py-3 text-right" x-text="fmt(materialTotals().wholesale)"></td>
+                <td class="py-3 text-right" x-text="fmt(materialTotals().retail)"></td>
+                <td class="py-3 text-right font-semibold" x-text="fmt(materialTotals().offered)"></td>
+              </tr>
+              <tr class="border-b border-gray-100">
+                <td class="py-3 font-medium">Structural & Hardware</td>
+                <td class="py-3 text-right" x-text="fmt(structuralTotals().wholesale)"></td>
+                <td class="py-3 text-right" x-text="fmt(structuralTotals().retail)"></td>
+                <td class="py-3 text-right font-semibold" x-text="fmt(structuralTotals().ext_offered)"></td>
+              </tr>
+              <tr class="border-b border-gray-100">
+                <td class="py-3 font-medium">Labor</td>
+                <td class="py-3 text-right text-gray-400">--</td>
+                <td class="py-3 text-right text-gray-400">--</td>
+                <td class="py-3 text-right font-semibold" x-text="fmt(laborTotals().total)"></td>
+              </tr>
+              <tr class="border-b border-gray-100">
+                <td class="py-3 font-medium">Permits & Fees</td>
+                <td class="py-3 text-right text-gray-400">--</td>
+                <td class="py-3 text-right text-gray-400">--</td>
+                <td class="py-3 text-right font-semibold" x-text="fmt(permitTotal())"></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-gray-300 font-bold text-lg">
+                <td class="py-4">Grand Total</td>
+                <td class="py-4 text-right" x-text="fmt(grandTotal('wholesale'))"></td>
+                <td class="py-4 text-right" x-text="fmt(grandTotal('retail'))"></td>
+                <td class="py-4 text-right text-green-800 text-xl" x-text="fmt(grandTotal('offered'))"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick comparison if they swap products -->
+      <div class="card mt-6">
+        <div class="card-header">
+          <h2 class="text-xl font-semibold">What-If: Product Impact on Total</h2>
+        </div>
+        <div class="p-6">
+          <p class="text-sm text-gray-500 mb-4">See how swapping one product category changes your total. Go to the <button @click="tab='products'" class="underline text-green-800 font-medium">Products tab</button> to change selections.</p>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <template x-for="cat in productCategories" :key="cat.key">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="text-xs text-gray-500 uppercase tracking-wide mb-1" x-text="cat.label"></div>
+                <div class="font-semibold text-sm mb-2" x-text="selectedProductName(cat.key)"></div>
+                <div class="text-lg font-bold brand-text" x-text="fmt(selectedProductCost(cat.key))"></div>
+                <div class="text-xs text-green-600" x-text="'Save ' + fmt(selectedProductRetail(cat.key) - selectedProductCost(cat.key)) + ' vs retail'"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox -->
+  <div x-show="lightboxImg" class="lightbox no-print" @click="lightboxImg = null" x-transition.opacity>
+    <img :src="lightboxImg" @click.stop>
+    <button @click="lightboxImg = null" class="absolute top-4 right-6 text-white text-3xl">&times;</button>
+  </div>
+
+  <footer class="text-center text-gray-400 text-xs py-8 no-print">
+    Deck Cost Calculator &mdash; All pricing is estimated and subject to final contractor quote.
+  </footer>
+
+<script>
+function deckApp() {
+  return {
+    data: null,
+    tab: 'overview',
+    dirty: false,
+    lightboxImg: null,
+    editing: {
+      overview: false,
+      quantities: false,
+      structural: false,
+      labor: false,
+      permits: false,
+      scope: false,
+      products: { decking: false, railing: false, waterproofing: false, screening: false },
+    },
+    filters: {
+      decking: { brand: '', type: '', sort: 'name' },
+      railing: { brand: '', type: '', sort: 'name' },
+      waterproofing: { brand: '', type: '', sort: 'name' },
+      screening: { brand: '', type: '', sort: 'name' },
+    },
+    tabs: [
+      { id: 'overview', label: 'Overview & Images' },
+      { id: 'products', label: 'Product Selector' },
+      { id: 'materials', label: 'Materials' },
+      { id: 'labor', label: 'Labor' },
+      { id: 'permits', label: 'Permits & Fees' },
+      { id: 'scope', label: 'Out of Scope' },
+      { id: 'summary', label: 'Summary' },
+    ],
+    productCategories: [
+      { key: 'decking', label: 'Decking', qtyKey: 'deck_board_lf', _adding: false, _new: {} },
+      { key: 'railing', label: 'Railing', qtyKey: 'railing_lf', _adding: false, _new: {} },
+      { key: 'waterproofing', label: 'Waterproofing / Under-Deck', qtyKey: 'underporch_sqft', _adding: false, _new: {} },
+      { key: 'screening', label: 'Screening System', qtyKey: 'screening_lf', _adding: false, _new: {} },
+    ],
+    quantityLabels: [
+      ['deck_sqft', 'Deck area (sq ft)'],
+      ['deck_board_lf', 'Decking boards (linear ft)'],
+      ['railing_lf', 'Railing (linear ft)'],
+      ['underporch_sqft', 'Underporch area (sq ft)'],
+      ['screening_lf', 'Screening perimeter (linear ft)'],
+      ['screen_panels', 'Screen panels (if retractable)'],
+      ['stairs_count', 'Stair sections'],
+      ['stair_treads_lf', 'Stair treads (linear ft)'],
+    ],
+
+    async init() {
+      const res = await fetch('/api/data');
+      this.data = await res.json();
+    },
+
+    async saveAll() {
+      await fetch('/api/data', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(this.data) });
+      this.dirty = false;
+    },
+
+    toggleEditProduct(key) {
+      this.editing.products[key] = !this.editing.products[key];
+    },
+
+    uniqueBrands(catKey) {
+      const brands = new Set((this.data.product_options[catKey] || []).map(p => p.brand));
+      return [...brands].sort();
+    },
+
+    uniqueTypes(catKey) {
+      const types = new Set((this.data.product_options[catKey] || []).map(p => p.type));
+      return [...types].sort();
+    },
+
+    filteredProducts(catKey) {
+      let products = [...(this.data.product_options[catKey] || [])];
+      const f = this.filters[catKey];
+      if (f.brand) products = products.filter(p => p.brand === f.brand);
+      if (f.type) products = products.filter(p => p.type === f.type);
+      switch (f.sort) {
+        case 'price-low': products.sort((a, b) => a.offered - b.offered); break;
+        case 'price-high': products.sort((a, b) => b.offered - a.offered); break;
+        case 'savings': products.sort((a, b) => {
+          const sa = a.retail ? (1 - a.offered / a.retail) : 0;
+          const sb = b.retail ? (1 - b.offered / b.retail) : 0;
+          return sb - sa;
+        }); break;
+        default: products.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return products;
+    },
+
+    fmt(n) { return '$' + (n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); },
+
+    savingsPct(retail, offered) {
+      if (!retail) return 0;
+      return Math.round((1 - offered / retail) * 100);
+    },
+
+    getSelected(catKey) {
+      const id = this.data.selections[catKey];
+      return (this.data.product_options[catKey] || []).find(p => p.id === id) || {};
+    },
+
+    selectedProductName(catKey) {
+      return this.getSelected(catKey).name || 'None';
+    },
+
+    selectedProductCost(catKey) {
+      const p = this.getSelected(catKey);
+      const cat = this.productCategories.find(c => c.key === catKey);
+      const qty = this.data.quantities[cat.qtyKey] || 0;
+      return (p.offered || 0) * qty;
+    },
+
+    selectedProductRetail(catKey) {
+      const p = this.getSelected(catKey);
+      const cat = this.productCategories.find(c => c.key === catKey);
+      const qty = this.data.quantities[cat.qtyKey] || 0;
+      return (p.retail || 0) * qty;
+    },
+
+    materialRows() {
+      return this.productCategories.map(cat => {
+        const p = this.getSelected(cat.key);
+        const qty = this.data.quantities[cat.qtyKey] || 0;
+        return {
+          category: cat.label,
+          product: p.name || '\u2014',
+          qty: qty,
+          unit: (p.unit || '').replace('per ', ''),
+          wholesale_total: (p.wholesale || 0) * qty,
+          retail_total: (p.retail || 0) * qty,
+          offered_total: (p.offered || 0) * qty,
+        };
+      });
+    },
+
+    materialTotals() {
+      const rows = this.materialRows();
+      return {
+        wholesale: rows.reduce((s, r) => s + r.wholesale_total, 0),
+        retail: rows.reduce((s, r) => s + r.retail_total, 0),
+        offered: rows.reduce((s, r) => s + r.offered_total, 0),
+      };
+    },
+
+    structuralTotals() {
+      const items = this.data.structural.items;
+      return {
+        wholesale: items.reduce((s, it) => s + (it.qty * it.wholesale), 0),
+        retail: items.reduce((s, it) => s + (it.qty * it.retail), 0),
+        offered: items.reduce((s, it) => s + (it.qty * it.offered), 0),
+        ext_offered: items.reduce((s, it) => s + (it.qty * it.offered), 0),
+      };
+    },
+
+    laborTotals() {
+      const items = this.data.labor.items;
+      return {
+        hours: items.reduce((s, it) => s + it.hours, 0),
+        total: items.reduce((s, it) => s + it.total, 0),
+      };
+    },
+
+    permitTotal() {
+      return this.data.permits.items.reduce((s, it) => s + (it.cost || 0), 0);
+    },
+
+    laborPct() {
+      const l = this.laborTotals().total;
+      const m = this.materialTotals().offered + this.structuralTotals().ext_offered;
+      const total = l + m;
+      return total ? Math.round(l / total * 100) : 50;
+    },
+
+    grandTotal(tier) {
+      const mt = this.materialTotals();
+      const st = this.structuralTotals();
+      const labor = this.laborTotals().total;
+      const permits = this.permitTotal();
+
+      if (tier === 'wholesale') return mt.wholesale + st.wholesale;
+      if (tier === 'retail') return mt.retail + st.retail + labor + permits;
+      return mt.offered + st.ext_offered + labor + permits;
+    },
+
+    removeProduct(catKey, productId) {
+      const idx = this.data.product_options[catKey].findIndex(p => p.id === productId);
+      if (idx !== -1) {
+        this.data.product_options[catKey].splice(idx, 1);
+        this.dirty = true;
+      }
+    },
+
+    addProduct(cat) {
+      const n = cat._new;
+      if (!n.name) return;
+      const id = n.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      this.data.product_options[cat.key].push({
+        id, name: n.name, brand: n.brand || '', type: n.type || '',
+        unit: n.unit || 'per LF', wholesale: n.wholesale || 0, retail: n.retail || 0,
+        offered: n.offered || 0, notes: n.notes || '',
+      });
+      cat._new = {};
+      cat._adding = false;
+      this.dirty = true;
+    },
+
+    addStructuralItem() {
+      this.data.structural.items.push({ name: 'New item', qty: 1, wholesale: 0, retail: 0, offered: 0, unit: 'each' });
+      this.editing.structural = true;
+      this.dirty = true;
+    },
+
+    addLaborItem() {
+      this.data.labor.items.push({ name: 'New task', hours: 0, rate: 65, total: 0 });
+      this.editing.labor = true;
+      this.dirty = true;
+    },
+
+    addPermitItem() {
+      this.data.permits.items.push({ name: 'New permit/fee', cost: 0, notes: '' });
+      this.editing.permits = true;
+      this.dirty = true;
+    },
+
+    addScopeItem() {
+      this.data.out_of_scope.push({ name: 'New item', est_cost: 'TBD', notes: '' });
+      this.editing.scope = true;
+      this.dirty = true;
+    },
+
+    async uploadImages(event, category) {
+      const files = event.target.files;
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/images/' + category, { method: 'POST', body: fd });
+        const result = await res.json();
+        if (result.url && !this.data.images[category].includes(result.url)) {
+          this.data.images[category].push(result.url);
+        }
+      }
+      event.target.value = '';
+    },
+
+    async removeImage(category, index) {
+      const url = this.data.images[category][index];
+      const filename = url.split('/').pop();
+      await fetch('/api/images/' + category + '/' + filename, { method: 'DELETE' });
+      this.data.images[category].splice(index, 1);
+    },
+  };
+}
+</script>
+</body>
+</html>

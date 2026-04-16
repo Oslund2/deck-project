@@ -412,7 +412,7 @@
         </div>
       </div>
 
-      <!-- Structural -->
+      <!-- Structural: any 2 of qty / unit price / extended solves the 3rd -->
       <div class="card mb-4">
         <div class="card-header flex items-center justify-between">
           <h2 class="font-semibold">Structural & Hardware</h2>
@@ -422,15 +422,25 @@
           </button>
         </div>
         <div class="p-3 overflow-x-auto">
+          <div x-show="editing.structural" class="text-xs text-gray-400 mb-2">Enter any 2 of Qty / Unit Price / Extended — the 3rd auto-calculates</div>
           <table class="w-full text-xs sm:text-sm">
-            <thead><tr class="border-b-2"><th class="text-left py-1">Item</th><th class="text-right py-1">Qty</th><th class="text-right py-1">Offered</th><th class="text-right py-1">Ext.</th></tr></thead>
+            <thead><tr class="border-b-2"><th class="text-left py-1">Item</th><th class="text-right py-1">Qty</th><th class="text-right py-1">Unit $</th><th class="text-right py-1">Extended</th></tr></thead>
             <tbody>
               <template x-for="(item,i) in structuralItems" :key="item.id">
                 <tr class="border-b border-gray-100" :class="editing.structural?'bg-yellow-50':''">
                   <td class="py-1"><span x-show="!editing.structural" x-text="item.name"></span><input x-show="editing.structural" x-model="item.name" class="edit-input text-xs"></td>
-                  <td class="py-1 text-right"><span x-show="!editing.structural" x-text="item.qty"></span><input x-show="editing.structural" type="number" x-model.number="item.qty" class="edit-input edit-num text-xs"></td>
-                  <td class="py-1 text-right"><span x-show="!editing.structural" x-text="fmt(item.offered)"></span><input x-show="editing.structural" type="number" step="0.01" x-model.number="item.offered" class="edit-input edit-num text-xs"></td>
-                  <td class="py-1 text-right font-medium" x-text="fmt(item.qty*item.offered)"></td>
+                  <td class="py-1 text-right">
+                    <span x-show="!editing.structural" x-text="item.qty"></span>
+                    <input x-show="editing.structural" type="number" x-model.number="item.qty" @input="solveStructural(item,'qty')" class="edit-input edit-num text-xs" :class="item._lastEdited==='qty'?'':''" inputmode="decimal">
+                  </td>
+                  <td class="py-1 text-right">
+                    <span x-show="!editing.structural" x-text="fmt(item.offered)"></span>
+                    <input x-show="editing.structural" type="number" step="0.01" x-model.number="item.offered" @input="solveStructural(item,'offered')" class="edit-input edit-num text-xs" inputmode="decimal">
+                  </td>
+                  <td class="py-1 text-right">
+                    <span x-show="!editing.structural" class="font-medium" x-text="fmt(item.qty*item.offered)"></span>
+                    <input x-show="editing.structural" type="number" step="0.01" x-model.number="item._ext" @input="solveStructural(item,'ext')" class="edit-input edit-num text-xs font-medium" inputmode="decimal">
+                  </td>
                 </tr>
               </template>
             </tbody>
@@ -440,7 +450,7 @@
         </div>
       </div>
 
-      <!-- Labor -->
+      <!-- Labor: any 2 of hours / rate / total solves the 3rd -->
       <div class="card mb-4">
         <div class="card-header flex items-center justify-between">
           <h2 class="font-semibold">Labor</h2>
@@ -450,15 +460,25 @@
           </button>
         </div>
         <div class="p-3 overflow-x-auto">
+          <div x-show="editing.labor" class="text-xs text-gray-400 mb-2">Enter any 2 of Hours / Rate / Total — the 3rd auto-calculates</div>
           <table class="w-full text-xs sm:text-sm">
             <thead><tr class="border-b-2"><th class="text-left py-1">Task</th><th class="text-right py-1">Hrs</th><th class="text-right py-1">$/hr</th><th class="text-right py-1">Total</th></tr></thead>
             <tbody>
               <template x-for="item in laborItems" :key="item.id">
                 <tr class="border-b border-gray-100" :class="editing.labor?'bg-yellow-50':''">
                   <td class="py-1"><span x-show="!editing.labor" x-text="item.name"></span><input x-show="editing.labor" x-model="item.name" class="edit-input text-xs"></td>
-                  <td class="py-1 text-right"><span x-show="!editing.labor" x-text="item.hours"></span><input x-show="editing.labor" type="number" x-model.number="item.hours" @input="item.total=item.hours*item.rate" class="edit-input edit-num text-xs"></td>
-                  <td class="py-1 text-right"><span x-show="!editing.labor" x-text="fmt(item.rate)"></span><input x-show="editing.labor" type="number" step="0.01" x-model.number="item.rate" @input="item.total=item.hours*item.rate" class="edit-input edit-num text-xs"></td>
-                  <td class="py-1 text-right font-medium" x-text="fmt(item.hours*item.rate)"></td>
+                  <td class="py-1 text-right">
+                    <span x-show="!editing.labor" x-text="item.hours"></span>
+                    <input x-show="editing.labor" type="number" step="0.5" x-model.number="item.hours" @input="solveLabor(item,'hours')" class="edit-input edit-num text-xs" inputmode="decimal">
+                  </td>
+                  <td class="py-1 text-right">
+                    <span x-show="!editing.labor" x-text="fmt(item.rate)"></span>
+                    <input x-show="editing.labor" type="number" step="0.01" x-model.number="item.rate" @input="solveLabor(item,'rate')" class="edit-input edit-num text-xs" inputmode="decimal">
+                  </td>
+                  <td class="py-1 text-right">
+                    <span x-show="!editing.labor" class="font-medium" x-text="fmt(item.total)"></span>
+                    <input x-show="editing.labor" type="number" step="1" x-model.number="item.total" @input="solveLabor(item,'total')" class="edit-input edit-num text-xs font-medium" inputmode="decimal">
+                  </td>
                 </tr>
               </template>
             </tbody>
@@ -707,7 +727,7 @@ function deckApp() {
       this.quantities = quant.data || [];
       this.selections = sel.data || [];
       this.productOptions = prods.data || [];
-      this.structuralItems = struct.data || [];
+      this.structuralItems = (struct.data || []).map(it => ({...it, _ext: Math.round(it.qty * it.offered * 100) / 100, _lastEdited: ''}));
       this.laborItems = labor.data || [];
       this.permitItems = permits.data || [];
       this.scopeItems = scope.data || [];
@@ -776,6 +796,37 @@ function deckApp() {
       s.railingLF = Math.round(s.stringerLength * 2);
       s.stringers = s.width <= 3 ? 2 : s.width <= 5 ? 3 : 4;
     },
+    // Solve any 2 of 3 for labor: hours * rate = total
+    solveLabor(item, changed) {
+      item._lastLabor = changed;
+      const h = item.hours || 0, r = item.rate || 0, t = item.total || 0;
+      if (changed === 'hours') {
+        if (h > 0 && r > 0) item.total = Math.round(h * r * 100) / 100;
+        else if (h > 0 && t > 0) item.rate = Math.round(t / h * 100) / 100;
+      } else if (changed === 'rate') {
+        if (r > 0 && h > 0) item.total = Math.round(h * r * 100) / 100;
+        else if (r > 0 && t > 0) item.hours = Math.round(t / r * 10) / 10;
+      } else if (changed === 'total') {
+        if (t > 0 && r > 0) item.hours = Math.round(t / r * 10) / 10;
+        else if (t > 0 && h > 0) item.rate = Math.round(t / h * 100) / 100;
+      }
+    },
+
+    // Solve any 2 of 3 for structural: qty * offered = ext
+    solveStructural(item, changed) {
+      const q = item.qty || 0, o = item.offered || 0, e = item._ext || 0;
+      if (changed === 'qty') {
+        if (q > 0 && o > 0) item._ext = Math.round(q * o * 100) / 100;
+        else if (q > 0 && e > 0) item.offered = Math.round(e / q * 100) / 100;
+      } else if (changed === 'offered') {
+        if (o > 0 && q > 0) item._ext = Math.round(q * o * 100) / 100;
+        else if (o > 0 && e > 0) item.qty = Math.round(e / o * 100) / 100;
+      } else if (changed === 'ext') {
+        if (e > 0 && q > 0) { item.offered = Math.round(e / q * 100) / 100; }
+        else if (e > 0 && o > 0) { item.qty = Math.round(e / o * 100) / 100; }
+      }
+    },
+
     totalRailingLF() { return this.getQty('railing_lf') + (this.calc.catwalk.length * 2) + this.calc.stairs.railingLF; },
     totalDeckingLF() { return this.getQty('deck_board_lf') + this.calc.catwalk.boardLF + this.calc.stairs.treadLF; },
 
@@ -831,7 +882,7 @@ function deckApp() {
     materialTotals() { const r = this.materialRows(); return { offered: r.reduce((s,r)=>s+r.offered_total,0), retail: r.reduce((s,r)=>s+r.retail_total,0) }; },
     structuralTotal() { return this.structuralItems.reduce((s,it) => s + it.qty * it.offered, 0); },
     structuralRetailTotal() { return this.structuralItems.reduce((s,it) => s + it.qty * it.retail, 0); },
-    laborTotal() { return this.laborItems.reduce((s,it) => s + it.hours * it.rate, 0); },
+    laborTotal() { return this.laborItems.reduce((s,it) => s + (it.total || it.hours * it.rate), 0); },
     permitTotal() { return this.permitItems.reduce((s,it) => s + (it.cost||0), 0); },
     laborPct() { const l=this.laborTotal(), m=this.materialTotals().offered+this.structuralTotal(); return (l+m)?Math.round(l/(l+m)*100):50; },
     grandTotal(tier) {

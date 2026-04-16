@@ -144,7 +144,9 @@
           </button>
         </div>
         <div class="p-4 space-y-4">
-          <!-- Area calculators: enter any 2, get the 3rd -->
+          <p class="text-xs text-gray-500">Enter dimensions. Sq ft, board counts, and LF auto-calculate.</p>
+
+          <!-- Area calculators: enter L x W, get sqft -->
           <template x-for="area in areaCalcs" :key="area.name">
             <div class="bg-gray-50 rounded-lg p-3">
               <h4 class="text-xs font-bold text-gray-500 uppercase mb-2" x-text="area.name"></h4>
@@ -178,10 +180,10 @@
             </div>
           </template>
 
-          <!-- Other measurements -->
+          <!-- Manual-entry only fields -->
           <div class="border-t pt-3">
-            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Linear & Count</h4>
-            <template x-for="q in quantities.filter(q => !areaKeys.includes(q.key))" :key="q.key">
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Manual Entry</h4>
+            <template x-for="q in manualQuantities()" :key="q.key">
               <div class="flex items-center justify-between py-1">
                 <span class="text-sm text-gray-600" x-text="q.label"></span>
                 <span x-show="!editing.quantities" class="text-sm font-semibold" x-text="Number(q.value).toLocaleString()"></span>
@@ -189,6 +191,18 @@
                        class="edit-input edit-num text-sm" inputmode="numeric">
               </div>
             </template>
+          </div>
+
+          <!-- Auto-calculated summary (read-only) -->
+          <div class="border-t pt-3">
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Auto-Calculated (from Calculator tab)</h4>
+            <div class="space-y-1 text-sm">
+              <div class="flex justify-between py-1"><span class="text-gray-500">Total decking board LF</span><span class="font-semibold" x-text="totalDeckingLF() + ' LF'"></span></div>
+              <div class="flex justify-between py-1"><span class="text-gray-500">+ 10% waste</span><span class="font-semibold brand-text" x-text="Math.ceil(totalDeckingLF() * 1.1) + ' LF'"></span></div>
+              <div class="flex justify-between py-1"><span class="text-gray-500">Total railing LF</span><span class="font-semibold" x-text="totalRailingLF() + ' LF'"></span></div>
+              <div class="flex justify-between py-1"><span class="text-gray-500">Stair treads</span><span class="font-semibold" x-text="calc.stairs.treadLF + ' LF (' + calc.stairs.steps + ' steps)'"></span></div>
+              <div class="flex justify-between py-1"><span class="text-gray-500">Catwalk boards</span><span class="font-semibold" x-text="calc.catwalk.boardLF + ' LF'"></span></div>
+            </div>
           </div>
 
           <button x-show="editing.quantities" @click="saveAllMeasurements(); editing.quantities=false" class="brand-bg text-white px-4 py-2 rounded-lg text-sm w-full sm:w-auto mt-2">Save Measurements</button>
@@ -662,6 +676,7 @@ function deckApp() {
       { name: 'Underporch', sqftKey: 'underporch_sqft', length: 0, width: 0, sqft: 0 },
     ],
     areaKeys: ['deck_sqft', 'underporch_sqft'],
+    derivedKeys: ['deck_sqft', 'underporch_sqft', 'deck_board_lf', 'stair_treads_lf', 'catwalk_lf', 'catwalk_length_ft', 'catwalk_width_ft', 'stair_rise_ft', 'stair_width_ft', 'stair_tread_depth_in', 'screen_panels', 'stairs_count', 'railing_sections'],
     filters: { decking:{brand:'',sort:'name'}, railing:{brand:'',sort:'name'}, waterproofing:{brand:'',sort:'name'}, screening:{brand:'',sort:'name'} },
     productCategories: [
       {key:'decking',label:'Decking',qtyKey:'deck_board_lf'},
@@ -728,6 +743,10 @@ function deckApp() {
       // Persist L x W in localStorage (not in DB — derived values)
       localStorage.setItem('area_' + area.sqftKey, JSON.stringify({ length: area.length, width: area.width }));
       this.dirty = true;
+    },
+
+    manualQuantities() {
+      return this.quantities.filter(q => !this.derivedKeys.includes(q.key));
     },
 
     async saveAllMeasurements() {

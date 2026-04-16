@@ -97,6 +97,38 @@
 
     <!-- ===== OVERVIEW ===== -->
     <section x-show="tab === 'overview'">
+      <!-- Before / After Hero -->
+      <div class="card mb-4" x-show="heroImages().before || heroImages().after">
+        <div class="grid grid-cols-2 gap-0">
+          <div class="relative">
+            <img :src="heroImages().before" class="w-full h-40 sm:h-56 object-cover rounded-l-xl" x-show="heroImages().before" @click="lightboxImg=heroImages().before">
+            <span class="absolute top-2 left-2 pill bg-red-500 text-white text-xs">BEFORE</span>
+          </div>
+          <div class="relative">
+            <img :src="heroImages().after" class="w-full h-40 sm:h-56 object-cover rounded-r-xl" x-show="heroImages().after" @click="lightboxImg=heroImages().after">
+            <span class="absolute top-2 right-2 pill bg-green-600 text-white text-xs">AFTER</span>
+          </div>
+        </div>
+        <div class="p-2 flex justify-between text-xs text-gray-400 no-print">
+          <div class="flex items-center gap-1">
+            <span>Before:</span>
+            <select x-model="selectedHero.before" @change="saveHeroSelections()" class="border-0 bg-transparent text-xs text-gray-600 cursor-pointer">
+              <template x-for="img in images.filter(i=>i.category==='current')" :key="img.id">
+                <option :value="img.url" x-text="img.url.split('/').pop()"></option>
+              </template>
+            </select>
+          </div>
+          <div class="flex items-center gap-1">
+            <span>After:</span>
+            <select x-model="selectedHero.after" @change="saveHeroSelections()" class="border-0 bg-transparent text-xs text-gray-600 cursor-pointer">
+              <template x-for="img in images.filter(i=>i.category==='rendered')" :key="img.id">
+                <option :value="img.url" x-text="img.url.split('/').pop()"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header flex items-center justify-between">
           <h2 class="font-semibold">Project Overview</h2>
@@ -812,6 +844,7 @@ function deckApp() {
     structuralItems: [], laborItems: [], permitItems: [], scopeItems: [], images: [],
     changeRequests: [], showNewChange: false,
     contracts: [], activeContract: null, contractDirty: false, signing: { active: false, who: '' },
+    selectedHero: { before: '', after: '' },
     newChange: { request_type: 'add', category: 'structural', title: '', description: '', estimated_cost: '' },
     editing: { overview:false, quantities:false, structural:false, labor:false, permits:false },
     calc: {
@@ -872,12 +905,22 @@ function deckApp() {
         const saved = localStorage.getItem('area_' + area.sqftKey);
         if (saved) { const s = JSON.parse(saved); area.length = s.length || 0; area.width = s.width || 0; }
       }
+      // Init hero images (from localStorage or first of each)
+      const savedHero = localStorage.getItem('deck_hero');
+      if (savedHero) { this.selectedHero = JSON.parse(savedHero); }
+      const currentImgs = this.images.filter(i => i.category === 'current');
+      const renderedImgs = this.images.filter(i => i.category === 'rendered');
+      if (!this.selectedHero.before && currentImgs.length) this.selectedHero.before = currentImgs[0].url;
+      if (!this.selectedHero.after && renderedImgs.length) this.selectedHero.after = renderedImgs[0].url;
       // Init board calculators
       this.recalcCatwalk();
       this.recalcStairs();
     },
 
     saveRole() { localStorage.setItem('deck_role', this.role); },
+
+    heroImages() { return { before: this.selectedHero.before, after: this.selectedHero.after }; },
+    saveHeroSelections() { localStorage.setItem('deck_hero', JSON.stringify(this.selectedHero)); },
 
     calcArea(area, changed) {
       const l = area.length || 0, w = area.width || 0, s = area.sqft || 0;

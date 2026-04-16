@@ -143,16 +143,55 @@
             <svg x-show="editing.quantities" class="w-5 h-5 text-green-300 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </button>
         </div>
-        <div class="p-4 space-y-2">
-          <template x-for="q in quantities" :key="q.key">
-            <div class="flex items-center justify-between py-1">
-              <span class="text-sm text-gray-600" x-text="q.label"></span>
-              <span x-show="!editing.quantities" class="text-sm font-semibold" x-text="Number(q.value).toLocaleString()"></span>
-              <input x-show="editing.quantities" type="number" x-model.number="q.value" @input="dirty=true"
-                     class="edit-input edit-num text-sm" inputmode="numeric">
+        <div class="p-4 space-y-4">
+          <!-- Area calculators: enter any 2, get the 3rd -->
+          <template x-for="area in areaCalcs" :key="area.name">
+            <div class="bg-gray-50 rounded-lg p-3">
+              <h4 class="text-xs font-bold text-gray-500 uppercase mb-2" x-text="area.name"></h4>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="text-xs text-gray-400">Length (ft)</label>
+                  <template x-if="editing.quantities">
+                    <input type="number" step="0.1" x-model.number="area.length" inputmode="decimal"
+                           @input="calcArea(area, 'length')" class="edit-input text-sm text-center">
+                  </template>
+                  <div x-show="!editing.quantities" class="text-sm font-semibold text-center py-1" x-text="area.length || '—'"></div>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400">Width (ft)</label>
+                  <template x-if="editing.quantities">
+                    <input type="number" step="0.1" x-model.number="area.width" inputmode="decimal"
+                           @input="calcArea(area, 'width')" class="edit-input text-sm text-center">
+                  </template>
+                  <div x-show="!editing.quantities" class="text-sm font-semibold text-center py-1" x-text="area.width || '—'"></div>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400">Sq Ft</label>
+                  <template x-if="editing.quantities">
+                    <input type="number" step="1" x-model.number="area.sqft" inputmode="numeric"
+                           @input="calcArea(area, 'sqft')" class="edit-input text-sm text-center font-bold brand-text">
+                  </template>
+                  <div x-show="!editing.quantities" class="text-sm font-bold text-center py-1 brand-text" x-text="area.sqft ? area.sqft.toLocaleString() : '—'"></div>
+                </div>
+              </div>
+              <div class="text-xs text-gray-400 mt-1 text-center">Enter any two to calculate the third</div>
             </div>
           </template>
-          <button x-show="editing.quantities" @click="saveQuantities(); editing.quantities=false" class="brand-bg text-white px-4 py-2 rounded-lg text-sm w-full sm:w-auto mt-2">Save Measurements</button>
+
+          <!-- Other measurements -->
+          <div class="border-t pt-3">
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Linear & Count</h4>
+            <template x-for="q in quantities.filter(q => !areaKeys.includes(q.key))" :key="q.key">
+              <div class="flex items-center justify-between py-1">
+                <span class="text-sm text-gray-600" x-text="q.label"></span>
+                <span x-show="!editing.quantities" class="text-sm font-semibold" x-text="Number(q.value).toLocaleString()"></span>
+                <input x-show="editing.quantities" type="number" x-model.number="q.value" @input="dirty=true"
+                       class="edit-input edit-num text-sm" inputmode="numeric">
+              </div>
+            </template>
+          </div>
+
+          <button x-show="editing.quantities" @click="saveAllMeasurements(); editing.quantities=false" class="brand-bg text-white px-4 py-2 rounded-lg text-sm w-full sm:w-auto mt-2">Save Measurements</button>
         </div>
       </div>
 
@@ -518,6 +557,11 @@ function deckApp() {
     changeRequests: [], showNewChange: false,
     newChange: { request_type: 'add', category: 'structural', title: '', description: '', estimated_cost: '' },
     editing: { overview:false, quantities:false, structural:false, labor:false, permits:false },
+    areaCalcs: [
+      { name: 'Upper Deck', sqftKey: 'deck_sqft', length: 0, width: 0, sqft: 0 },
+      { name: 'Underporch', sqftKey: 'underporch_sqft', length: 0, width: 0, sqft: 0 },
+    ],
+    areaKeys: ['deck_sqft', 'underporch_sqft'],
     filters: { decking:{brand:'',sort:'name'}, railing:{brand:'',sort:'name'}, waterproofing:{brand:'',sort:'name'}, screening:{brand:'',sort:'name'} },
     productCategories: [
       {key:'decking',label:'Decking',qtyKey:'deck_board_lf'},
@@ -554,9 +598,42 @@ function deckApp() {
       this.scopeItems = scope.data || [];
       this.images = imgs.data || [];
       this.changeRequests = changes.data || [];
+      // Init area calculators from saved sqft values
+      for (const area of this.areaCalcs) {
+        const q = this.quantities.find(q => q.key === area.sqftKey);
+        if (q) { area.sqft = Number(q.value) || 0; }
+        // Try to recover L x W from localStorage
+        const saved = localStorage.getItem('area_' + area.sqftKey);
+        if (saved) { const s = JSON.parse(saved); area.length = s.length || 0; area.width = s.width || 0; }
+      }
     },
 
     saveRole() { localStorage.setItem('deck_role', this.role); },
+
+    calcArea(area, changed) {
+      const l = area.length || 0, w = area.width || 0, s = area.sqft || 0;
+      if (changed === 'length' || changed === 'width') {
+        if (l > 0 && w > 0) area.sqft = Math.round(l * w);
+      } else if (changed === 'sqft') {
+        if (s > 0 && l > 0 && !w) area.width = Math.round((s / l) * 10) / 10;
+        else if (s > 0 && w > 0 && !l) area.length = Math.round((s / w) * 10) / 10;
+        else if (s > 0 && l > 0) area.width = Math.round((s / l) * 10) / 10;
+      }
+      // Sync sqft back to quantities array
+      const q = this.quantities.find(q => q.key === area.sqftKey);
+      if (q) q.value = area.sqft;
+      // Persist L x W in localStorage (not in DB — derived values)
+      localStorage.setItem('area_' + area.sqftKey, JSON.stringify({ length: area.length, width: area.width }));
+      this.dirty = true;
+    },
+
+    async saveAllMeasurements() {
+      for (const q of this.quantities) {
+        await sb.from('quantities').update({ value: q.value }).eq('id', q.id);
+      }
+      this.showToast('Measurements saved');
+    },
+
     showToast(msg) { this.toast = msg; setTimeout(() => this.toast = '', 2000); },
     fmt(n) { return '$' + (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); },
     savingsPct(r,o) { return r ? Math.round((1-o/r)*100) : 0; },
